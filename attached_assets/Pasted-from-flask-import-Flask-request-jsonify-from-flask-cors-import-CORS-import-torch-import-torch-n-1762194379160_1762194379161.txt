@@ -1,0 +1,564 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import torch
+import torch.nn as nn
+from torchvision import models, transforms
+import cv2
+import numpy as np
+from PIL import Image
+import io
+import base64
+import json
+import os
+from datetime import datetime
+import pytesseract
+import re
+import easyocr
+import requests
+
+# ========== CONFIGURATION ==========
+CONFIG = {
+    'models_path': './models',  # Changed for Hugging Face
+    'device': 'cuda' if torch.cuda.is_available() else 'cpu',
+    'img_size': 224,
+    'openai_api_key': os.getenv('OPENAI_API_KEY', ''),
+    'use_llm': False
+}
+
+# ========== FLASK APP SETUP ==========
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# ========== MODEL DEFINITION ==========
+class ProduceClassifier(nn.Module):
+    def __init__(self, num_classes):
+        super(ProduceClassifier, self).__init__()
+        self.backbone = models.mobilenet_v2(pretrained=False)
+        in_features = self.backbone.classifier[1].in_features
+        self.backbone.classifier = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, num_classes)
+        )
+
+    def forward(self, x):
+        return self.backbone(x)
+
+# ========== GLOBAL MODEL INSTANCES ==========
+produce_model = None
+organic_model = None
+produce_metadata = None
+organic_metadata = None
+ocr_reader = None
+
+# ========== PLU CODE KNOWLEDGE BASE ==========
+PLU_DATABASE = {
+    "4011": "Standard banana - conventional (non-organic)",
+    "94011": "Organic banana - 5-digit code starting with 9 indicates organic",
+    "4030": "Standard kiwi - conventional",
+    "94030": "Organic kiwi",
+    "4131": "Standard Fuji apple - conventional",
+    "94131": "Organic Fuji apple",
+    "4139": "Standard Granny Smith apple - conventional",
+    "94139": "Organic Granny Smith apple",
+    "4017": "Standard red delicious apple - conventional",
+    "94017": "Organic red delicious apple",
+    "4129": "Standard tomato - conventional",
+    "94129": "Organic tomato",
+    "4065": "Standard green bell pepper - conventional",
+    "94065": "Organic green bell pepper",
+    "4062": "Standard cucumber - conventional",
+    "94062": "Organic cucumber",
+}
+
+# ========== PRODUCE KNOWLEDGE BASE ==========
+PRODUCE_KNOWLEDGE = {
+    "apple": {
+        "nutrition": "Rich in dietary fiber, vitamin C, and antioxidants. Contains quercetin which supports heart health. One medium apple provides about 95 calories and 4g of fiber.",
+        "cleaning": "Soak in a solution of 1 tablespoon baking soda per 2 cups water for 12-15 minutes. Scrub gently with a soft brush. Rinse thoroughly under running water and pat dry."
+    },
+    "banana": {
+        "nutrition": "Excellent source of potassium (422mg per medium banana), vitamin B6, and vitamin C. Provides quick energy with natural sugars and resistant starch.",
+        "cleaning": "Wash the peel under running water before peeling to remove surface pesticides and dirt. No need to wash the fruit inside. Store at room temperature."
+    },
+    "tomato": {
+        "nutrition": "High in lycopene (antioxidant), vitamins A, C, and K. Low calorie (22 calories per medium tomato). Supports heart and skin health.",
+        "cleaning": "Rinse under cool running water, gently rubbing the surface. For organic tomatoes, a water rinse is sufficient. For conventional, soak in vinegar solution (1:3 vinegar to water) for 5 minutes."
+    },
+    "default": {
+        "nutrition": "Fresh produce is an excellent source of vitamins, minerals, fiber, and antioxidants. Eating a variety of colorful fruits and vegetables supports overall health and disease prevention.",
+        "cleaning": "Rinse thoroughly under running water. For produce with thick skin, scrub with a clean brush. Remove outer leaves if applicable. Pat dry with clean cloth or paper towel."
+    }
+}
+
+# ========== MODEL LOADING ==========
+def load_models():
+    """Load trained models and metadata"""
+    global produce_model, organic_model, produce_metadata, organic_metadata, ocr_reader
+
+    print("Loading models...")
+
+    # Load produce identification model
+    produce_checkpoint = torch.load(
+        os.path.join(CONFIG['models_path'], 'produce_classifier_best.pth'),
+        map_location=CONFIG['device']
+    )
+    produce_metadata = produce_checkpoint['metadata']
+
+    produce_model = ProduceClassifier(produce_metadata['num_classes'])
+    produce_model.load_state_dict(produce_checkpoint['model_state_dict'])
+    produce_model.to(CONFIG['device'])
+    produce_model.eval()
+    print(f"✅ Produce model loaded ({produce_metadata['num_classes']} classes)")
+
+    # Load organic detection model
+    organic_checkpoint = torch.load(
+        os.path.join(CONFIG['models_path'], 'organic_detector_best.pth'),
+        map_location=CONFIG['device']
+    )
+    organic_metadata = organic_checkpoint['metadata']
+
+    organic_model = ProduceClassifier(2)
+    organic_model.load_state_dict(organic_checkpoint['model_state_dict'])
+    organic_model.to(CONFIG['device'])
+    organic_model.eval()
+    print("✅ Organic detector loaded")
+
+    # Initialize OCR
+    try:
+        ocr_reader = easyocr.Reader(['en'], gpu=CONFIG['device']=='cuda')
+        print("✅ EasyOCR initialized")
+    except:
+        print("⚠️ EasyOCR failed, will use Tesseract")
+        ocr_reader = None
+
+    print("🚀 All models loaded successfully!")
+
+# ========== IMAGE PREPROCESSING ==========
+def preprocess_image(image_data):
+    """Convert base64 or file to tensor"""
+    if isinstance(image_data, str) and image_data.startswith('data:image'):
+        image_data = image_data.split(',')[1]
+        image_bytes = base64.b64decode(image_data)
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    else:
+        image = Image.open(io.BytesIO(image_data)).convert('RGB')
+
+    transform = transforms.Compose([
+        transforms.Resize((CONFIG['img_size'], CONFIG['img_size'])),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    tensor = transform(image).unsqueeze(0)
+    return tensor, image
+
+# ========== OCR PREPROCESSING ==========
+def preprocess_for_ocr(image):
+    """Light preprocessing for OCR - easyocr handles heavy lifting"""
+    img = np.array(image)
+    
+    # Convert to grayscale if needed
+    if len(img.shape) == 3:
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    else:
+        gray = img
+    
+    # Upscale if too small (improves OCR accuracy)
+    height, width = gray.shape
+    if height < 200 or width < 200:
+        scale = max(200 / height, 200 / width)
+        gray = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+    
+    # Light contrast enhancement
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(gray)
+    
+    return enhanced
+
+
+def extract_plu_code(image):
+    """Extract PLU code from image - optimized for easyocr"""
+    try:
+        # Convert to numpy array
+        img_array = np.array(image)
+        
+        # Resize if too small
+        height, width = img_array.shape[:2]
+        if height < 200 or width < 200:
+            scale = max(200 / height, 200 / width)
+            img_array = cv2.resize(img_array, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        
+        all_text = ""
+        confidence_score = 0.0
+        
+        # Try easyocr first (better for real-world images)
+        if ocr_reader:
+            try:
+                print("[OCR DEBUG] Using easyocr...")
+                # Pass raw image directly - easyocr does its own preprocessing
+                results = ocr_reader.readtext(img_array, detail=1)
+                
+                print(f"[OCR DEBUG] Raw results: {results}")
+                
+                # Extract all detected text
+                all_text = ' '.join([res[1] for res in results if len(res) > 1])
+                
+                # Calculate average confidence from easyocr
+                if results:
+                    confidences = [res[2] for res in results if len(res) > 2]
+                    if confidences:
+                        confidence_score = np.mean(confidences)
+                
+                print(f"[OCR DEBUG] EasyOCR detected text: '{all_text}'")
+                print(f"[OCR DEBUG] Average confidence: {confidence_score}")
+                
+            except Exception as e:
+                print(f"[OCR DEBUG] EasyOCR failed: {str(e)}")
+                all_text = ""
+        
+        # Fallback to Tesseract if easyocr didn't work
+        if not all_text:
+            try:
+                print("[OCR DEBUG] Using Tesseract fallback...")
+                processed = preprocess_for_ocr(image)
+                all_text = pytesseract.image_to_string(
+                    processed, 
+                    config='--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789'
+                )
+                confidence_score = 0.65
+                print(f"[OCR DEBUG] Tesseract text: '{all_text}'")
+            except Exception as e:
+                print(f"[OCR DEBUG] Tesseract failed: {str(e)}")
+                all_text = ""
+        
+        print(f"[OCR DEBUG] Final extracted text: '{all_text}'")
+        
+        # Clean up the text
+        all_text = all_text.strip()
+        
+        if not all_text:
+            print("[OCR DEBUG] No text detected at all")
+            return None, 0.0
+        
+        # Pattern to find PLU codes (4 or 5 digit numbers)
+        plu_pattern = r'\d{4,5}'
+        matches = re.findall(plu_pattern, all_text)
+        
+        print(f"[OCR DEBUG] Regex matches found: {matches}")
+        
+        # Try direct matches first
+        if matches:
+            for match in matches:
+                if len(match) in [4, 5]:
+                    if match in PLU_DATABASE:
+                        print(f"[OCR DEBUG] ✓ Found PLU in database: {match}")
+                        return match, min(0.90, confidence_score)
+                    else:
+                        print(f"[OCR DEBUG] ⚠ Found PLU but not in database: {match}")
+                        return match, min(0.75, confidence_score)
+        
+        # If no direct match, try variations (common OCR mistakes)
+        print("[OCR DEBUG] No direct match, trying variations...")
+        loose_pattern = r'[0-9OIlSZsz]{4,5}'
+        loose_matches = re.findall(loose_pattern, all_text)
+        
+        print(f"[OCR DEBUG] Loose matches: {loose_matches}")
+        
+        if loose_matches:
+            for match in loose_matches:
+                # Clean common OCR mistakes
+                cleaned = (match
+                          .replace('O', '0').replace('o', '0')
+                          .replace('I', '1').replace('l', '1')
+                          .replace('S', '5').replace('s', '5')
+                          .replace('Z', '2').replace('z', '2')
+                          .replace('B', '8').replace('b', '8'))
+                
+                if len(cleaned) in [4, 5] and cleaned.isdigit():
+                    if cleaned in PLU_DATABASE:
+                        print(f"[OCR DEBUG] ✓ Found corrected PLU: {cleaned}")
+                        return cleaned, min(0.70, confidence_score)
+        
+        print("[OCR DEBUG] No PLU code found in any form")
+        return None, 0.0
+        
+    except Exception as e:
+        print(f"[OCR DEBUG] Unexpected error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None, 0.0
+
+# ========== ORGANIC STATUS VERDICT SYSTEM ==========
+def compare_organic_status(model_organic_label, model_confidence, detected_plu, plu_confidence):
+    """
+    Compare model's organic detection with PLU code information
+    Returns a verdict with reasoning
+    """
+    
+    # Determine organic status from PLU code
+    plu_indicates_organic = False
+    plu_confidence_in_organic = 0.0
+    
+    if detected_plu:
+        # PLU codes starting with 9 are always organic
+        if detected_plu.startswith('9') and len(detected_plu) == 5:
+            plu_indicates_organic = True
+            plu_confidence_in_organic = plu_confidence * 0.95  # High confidence
+        # 4-digit codes are always conventional (non-organic)
+        elif len(detected_plu) == 4:
+            plu_indicates_organic = False
+            plu_confidence_in_organic = plu_confidence * 0.95  # High confidence
+    
+    # Determine what model says
+    model_says_organic = model_organic_label.lower() == 'organic'
+    
+    # Compare and create verdict
+    verdict = {
+        'model_prediction': model_organic_label,
+        'model_confidence': round(model_confidence, 3),
+        'plu_prediction': 'organic' if plu_indicates_organic else 'non_organic' if detected_plu else 'unknown',
+        'plu_confidence': round(plu_confidence_in_organic, 3) if detected_plu else 0.0,
+        'detected_plu': detected_plu or 'None',
+    }
+    
+    # Generate verdict based on comparison
+    if not detected_plu:
+        # No PLU code detected - rely on model only
+        verdict['verdict'] = model_organic_label.upper()
+        verdict['verdict_confidence'] = round(model_confidence, 3)
+        verdict['reasoning'] = f"No PLU code detected. Based on visual analysis, this produce is {model_organic_label} (confidence: {model_confidence*100:.1f}%)."
+        verdict['match'] = 'no_plu'
+        verdict['reliability'] = 'moderate'
+    
+    elif model_says_organic == plu_indicates_organic:
+        # Model and PLU agree!
+        verdict['verdict'] = model_organic_label.upper()
+        verdict['verdict_confidence'] = round(min(model_confidence, plu_confidence_in_organic), 3)
+        verdict['reasoning'] = f"✓ MATCH! Both model and PLU code ({detected_plu}) confirm this is {model_organic_label}. High confidence verdict."
+        verdict['match'] = 'perfect_match'
+        verdict['reliability'] = 'very_high'
+    
+    else:
+        # Model and PLU disagree - decide based on confidence and PLU reliability
+        if plu_confidence >= 0.75 and detected_plu:
+            # PLU is high confidence and detected clearly - trust PLU more
+            plu_label = 'organic' if plu_indicates_organic else 'non_organic'
+            verdict['verdict'] = plu_label.upper()
+            verdict['verdict_confidence'] = round(plu_confidence_in_organic, 3)
+            verdict['reasoning'] = f"⚠️ MISMATCH: Model says {model_organic_label}, but PLU code {detected_plu} indicates {plu_label}. Trusting PLU code (detected with {plu_confidence*100:.1f}% confidence) over visual analysis."
+            verdict['match'] = 'disagreement_plu_trusted'
+            verdict['reliability'] = 'high'
+        else:
+            # Model confidence is higher or PLU is uncertain - trust model
+            plu_label = 'organic' if plu_indicates_organic else 'non_organic'
+            verdict['verdict'] = model_organic_label.upper()
+            verdict['verdict_confidence'] = round(model_confidence, 3)
+            verdict['reasoning'] = f"⚠️ MISMATCH: Model says {model_organic_label}, but PLU code {detected_plu} might indicate {plu_label}. PLU confidence is low ({plu_confidence*100:.1f}%), so trusting visual analysis (confidence: {model_confidence*100:.1f}%)."
+            verdict['match'] = 'disagreement_model_trusted'
+            verdict['reliability'] = 'moderate'
+    
+    # Add recommendation
+    verdict['recommendation'] = generate_recommendation(
+        verdict['verdict'],
+        detected_plu,
+        verdict['reliability']
+    )
+    
+    return verdict
+
+
+def generate_recommendation(organic_status, plu_code, reliability):
+    """Generate user recommendation based on verdict"""
+    
+    recommendations = {
+        'ORGANIC': {
+            'very_high': f"✓ Certified organic (PLU: {plu_code}). Minimal pesticide residue. Simple water rinse recommended.",
+            'high': f"✓ Likely organic (PLU: {plu_code}). Use water rinse or mild vinegar solution for cleaning.",
+            'moderate': "⚠️ Uncertain organic status. Use vinegar solution (1:3 vinegar:water) for cleaning to be safe."
+        },
+        'NON_ORGANIC': {
+            'very_high': f"⚠️ Conventional produce (PLU: {plu_code}). May contain pesticide residues. Thorough cleaning recommended.",
+            'high': f"⚠️ Likely conventional (PLU: {plu_code}). Soak in baking soda solution for 12-15 minutes.",
+            'moderate': "⚠️ Uncertain status. Follow conventional cleaning: baking soda soak or vinegar solution."
+        }
+    }
+    
+    status = organic_status.upper()
+    return recommendations.get(status, {}).get(reliability, "Unable to determine recommendation.")
+
+# ========== LLM CHATBOT ==========
+def get_llm_advice(produce_name, organic_status, user_query=None):
+    """Get advice from knowledge base"""
+    produce_key = produce_name.lower().replace(' ', '_')
+    produce_info = PRODUCE_KNOWLEDGE.get(produce_key, PRODUCE_KNOWLEDGE['default'])
+
+    if user_query:
+        query_lower = user_query.lower()
+        if any(word in query_lower for word in ['nutrition', 'nutrient', 'vitamin', 'healthy']):
+            return produce_info['nutrition']
+        elif any(word in query_lower for word in ['clean', 'wash', 'prepare']):
+            return produce_info['cleaning']
+        else:
+            return f"{produce_info['nutrition']}\n\n{produce_info['cleaning']}"
+
+    organic_note = "This is organic produce, which means it was grown without synthetic pesticides. A simple water rinse is often sufficient." if organic_status.lower() == 'organic' else "For conventionally grown produce, extra cleaning steps help remove pesticide residues."
+
+    return f"**Nutrition:** {produce_info['nutrition']}\n\n**Cleaning Tips:** {produce_info['cleaning']}\n\n*Note:* {organic_note}"
+
+# ========== API ENDPOINTS ==========
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'models_loaded': produce_model is not None and organic_model is not None,
+        'device': CONFIG['device']
+    })
+
+@app.route('/login', methods=['POST'])
+def login():
+    """Mock authentication endpoint"""
+    data = request.json
+    email = data.get('email', '')
+    password = data.get('password', '')
+
+    if email and password:
+        return jsonify({
+            'success': True,
+            'message': 'Login successful',
+            'user': {
+                'email': email,
+                'name': email.split('@')[0].capitalize()
+            }
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'message': 'Invalid credentials'
+        }), 401
+
+@app.route('/infer_image', methods=['POST'])
+def infer_image():
+    """Main inference endpoint with organic status verdict"""
+    try:
+        if 'image' in request.files:
+            image_data = request.files['image'].read()
+        elif 'image' in request.json:
+            image_data = request.json['image']
+        else:
+            return jsonify({'error': 'No image provided'}), 400
+
+        tensor, original_image = preprocess_image(image_data)
+        tensor = tensor.to(CONFIG['device'])
+
+        # Get produce classification
+        with torch.no_grad():
+            produce_output = produce_model(tensor)
+            produce_probs = torch.softmax(produce_output, dim=1)
+            produce_conf, produce_idx = torch.max(produce_probs, 1)
+
+            produce_label = produce_metadata['idx_to_class'][str(produce_idx.item())]
+            produce_confidence = produce_conf.item()
+
+        # Get organic detection
+        with torch.no_grad():
+            organic_output = organic_model(tensor)
+            organic_probs = torch.softmax(organic_output, dim=1)
+            organic_conf, organic_idx = torch.max(organic_probs, 1)
+
+            organic_label = organic_metadata['idx_to_class'][str(organic_idx.item())]
+            organic_confidence = organic_conf.item()
+
+        # Extract PLU code
+        detected_plu, plu_confidence = extract_plu_code(original_image)
+        plu_meaning = PLU_DATABASE.get(detected_plu, "PLU code not in database") if detected_plu else "No PLU code detected"
+
+        # Generate organic status verdict
+        verdict = compare_organic_status(
+            organic_label, 
+            organic_confidence, 
+            detected_plu, 
+            plu_confidence
+        )
+
+        # Get automatic advice using verdict result
+        automatic_advice = get_llm_advice(produce_label, verdict['verdict'].lower())
+
+        response = {
+            'produce_label': produce_label,
+            'produce_confidence': round(produce_confidence, 3),
+            'model_organic_prediction': organic_label,
+            'model_organic_confidence': round(organic_confidence, 3),
+            'detected_plu': detected_plu or "None",
+            'plu_confidence': round(plu_confidence, 3),
+            'plu_meaning': plu_meaning,
+            'verdict': verdict,
+            'automatic_advice': automatic_advice,
+            'timestamp': datetime.now().isoformat()
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/chat_advice', methods=['POST'])
+def chat_advice():
+    """Interactive chatbot endpoint"""
+    try:
+        data = request.json
+        produce_name = data.get('produce_name', '')
+        organic_status = data.get('organic_status', 'non_organic')
+        user_query = data.get('query', '')
+
+        if not user_query:
+            return jsonify({'error': 'No query provided'}), 400
+
+        advice = get_llm_advice(produce_name, organic_status, user_query)
+
+        return jsonify({
+            'response': advice,
+            'timestamp': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/verify_plu', methods=['POST'])
+def verify_plu():
+    """Verify PLU code endpoint"""
+    try:
+        data = request.json
+        plu_code = data.get('plu_code', '')
+
+        if not plu_code:
+            return jsonify({'error': 'No PLU code provided'}), 400
+
+        meaning = PLU_DATABASE.get(plu_code, "PLU code not found in database")
+        is_organic = plu_code.startswith('9') and len(plu_code) == 5
+
+        return jsonify({
+            'plu_code': plu_code,
+            'meaning': meaning,
+            'is_organic': is_organic,
+            'explanation': "5-digit codes starting with 9 indicate organic produce. 4-digit codes are conventional."
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ========== MAIN ==========
+if __name__ == '__main__':
+    load_models()
+
+    print("\n" + "="*60)
+    print("🚀 AgriScan AI Server Running on Hugging Face Spaces")
+    print("="*60)
+    print(f"Device: {CONFIG['device']}")
+    print("="*60)
+
+    # Hugging Face Spaces uses port 7860
+    app.run(host='0.0.0.0', port=7860, debug=False)

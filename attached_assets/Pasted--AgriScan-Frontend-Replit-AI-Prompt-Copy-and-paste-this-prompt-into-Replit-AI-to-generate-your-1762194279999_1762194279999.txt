@@ -1,0 +1,265 @@
+# AgriScan Frontend - Replit AI Prompt
+
+Copy and paste this prompt into Replit AI to generate your complete frontend:
+
+---
+
+## PROMPT:
+
+```
+You are an expert React developer. Build a complete production-ready frontend for AgriScan, an AI-powered organic produce verification system. 
+
+BACKEND API BASE URL: https://iamsyedamisbah-agriscan-ai-backend.hf.space
+
+REQUIREMENTS:
+
+1. TECHNOLOGY STACK:
+   - React with Vite for frontend build
+   - React Router for navigation
+   - Tailwind CSS for styling
+   - Fetch API for backend calls
+   - Local storage for user sessions and history
+
+2. PAGES TO BUILD:
+
+   A) LOGIN PAGE (/login)
+   - Email and password input fields
+   - Login button
+   - Link to sign up (optional)
+   - Mock authentication (store user email in localStorage)
+   - Redirect to home after successful login
+   - Error messages for invalid credentials
+   - Professional AgriScan branding
+
+   B) HOME PAGE (/home)
+   - Welcome message with user's name
+   - Large image upload section with drag-and-drop
+   - Alternative: Take photo from camera option
+   - Optional manual PLU code input field
+   - Submit button to analyze produce
+   - Loading spinner while processing
+   - Real-time results display with:
+     * Detected produce name
+     * Produce confidence percentage
+     * Organic status verdict (ORGANIC/NON_ORGANIC)
+     * Verdict confidence with color-coded reliability (green=very_high, yellow=high, red=moderate)
+     * PLU code detected (if any)
+     * PLU meaning explanation
+     * Reasoning for verdict
+     * Recommendation for cleaning/handling
+     * Nutritional information
+   - History quick access button
+   - Logout button in navbar
+
+   C) HISTORY PAGE (/history)
+   - Display all previous scans in a list/card format
+   - Show timestamp, produce name, verdict, and confidence
+   - Sort by most recent first
+   - Delete individual scan history entries
+   - Clear all history button with confirmation
+   - Click on any scan to view full details
+   - Search/filter by produce name
+   - Pagination if history is long
+
+   D) ABOUT PAGE (/about)
+   - Project overview explaining what AgriScan does
+   - Problem statement: Organic food fraud statistics
+   - Solution: How AgriScan helps verify organic produce
+   - Features section listing all capabilities
+   - Technology section: PyTorch, EasyOCR, Flask, React
+   - How it works: Step-by-step process with icons
+   - Confidence levels explained (very_high, high, moderate)
+   - PLU code information and standards
+   - Contact/team information
+   - Link to GitHub repository
+
+   E) FRAUD REPORT PAGE (/report)
+   - Form to report potentially fraudulent produce
+   - Fields: Produce name, PLU code, location, vendor name, description
+   - Photo upload option
+   - Expected vs actual scan comparison
+   - Severity level dropdown (High/Medium/Low)
+   - Submit button
+   - Success message after submission
+   - List of recent fraud reports (read-only)
+   - Each report shows: date, produce, severity, status (Pending/Verified/Resolved)
+   - Report stats: Total reports, Verified fraud, Resolved cases
+
+3. NAVIGATION:
+   - Top navbar with:
+     * AgriScan logo/name
+     * Navigation links: Home, History, About, Fraud Report
+     * User profile dropdown with username and Logout
+   - Only show navbar when logged in
+   - Responsive design for mobile
+
+4. API INTEGRATION:
+   - POST /login endpoint (mock: just store email)
+   - POST /infer_image with image file and optional manual_plu
+   - GET /verify_plu with plu_code
+   - Store all scan results in localStorage under key 'agriscan_history'
+   - Store fraud reports in localStorage under key 'fraud_reports'
+   - Include proper error handling for API failures
+
+5. STYLING:
+   - Use Tailwind CSS with a green/earth color scheme (greens, browns, natural tones)
+   - Professional and clean UI
+   - Responsive design for mobile, tablet, and desktop
+   - Color-coded confidence levels:
+     * Green (#10B981) for very_high reliability
+     * Yellow (#F59E0B) for high reliability
+     * Red (#EF4444) for moderate reliability
+   - Loading states with spinners
+   - Success/error toast notifications
+
+6. USER EXPERIENCE FEATURES:
+   - Auto-logout after 30 minutes of inactivity
+   - Prevent page refresh from losing session
+   - Breadcrumb navigation showing current page
+   - Empty state messages (no history, no fraud reports)
+   - Smooth page transitions
+   - Proper error messages for API failures
+   - Retry button on failed API calls
+
+7. SECURITY:
+   - No sensitive data in localStorage (only session token placeholder)
+   - CORS-friendly API calls
+   - Input validation before sending to backend
+   - Sanitize user inputs
+
+8. PERFORMANCE:
+   - Lazy load images
+   - Optimize image upload (max 5MB)
+   - Debounce search/filter operations
+   - Memoize components to prevent unnecessary re-renders
+
+Generate complete, production-ready code with:
+- Proper folder structure (components, pages, utils)
+- Reusable components (Card, Button, Input, etc.)
+- Custom hooks for API calls
+- Clear comments and documentation
+- All pages fully functional
+- Ready to deploy
+
+Start building now!
+```
+
+---
+
+## HOW TO USE THIS PROMPT:
+
+1. Go to **https://replit.com**
+2. Click **"Create Repl"** → Select **"React"** template
+3. Open **Replit AI** (sidebar icon)
+4. Paste the entire prompt above
+5. Let Replit AI generate the code
+6. Review and test all pages
+7. Deploy directly from Replit
+
+---
+
+## BACKEND ENDPOINTS AVAILABLE:
+
+**POST /infer_image**
+- Send: image file + optional manual_plu
+- Returns: produce_label, organic_prediction, detected_plu, verdict, recommendation
+
+**POST /verify_plu**
+- Send: plu_code
+- Returns: plu_meaning, is_organic, explanation
+
+**POST /login**
+- Send: email, password
+- Returns: success, user info
+
+**GET /health**
+- Returns: server status
+
+---
+
+## EXPECTED RESPONSE FORMAT FROM /infer_image:
+
+```json
+{
+  "produce_label": "banana",
+  "produce_confidence": 0.95,
+  "model_organic_prediction": "organic",
+  "model_organic_confidence": 0.85,
+  "detected_plu": "94011",
+  "plu_confidence": 0.9,
+  "verdict": {
+    "verdict": "ORGANIC",
+    "verdict_confidence": 0.95,
+    "match": "perfect_match",
+    "reliability": "very_high",
+    "reasoning": "✓ MATCH! Both model and PLU code (94011) confirm this is organic.",
+    "recommendation": "✓ Certified organic (PLU: 94011). Minimal pesticide residue. Simple water rinse recommended."
+  },
+  "automatic_advice": "**Nutrition:** ... **Cleaning Tips:** ..."
+}
+```
+
+---
+
+## KEY PAGES DATA STRUCTURE:
+
+**Scan History Item:**
+```javascript
+{
+  id: timestamp,
+  date: new Date().toLocaleString(),
+  produce: "banana",
+  verdict: "ORGANIC",
+  confidence: 0.95,
+  plu: "94011",
+  fullData: { complete response from API }
+}
+```
+
+**Fraud Report Item:**
+```javascript
+{
+  id: timestamp,
+  date: new Date().toLocaleString(),
+  produce: "apple",
+  plu: "4131",
+  expected: "conventional",
+  actual: "organic",
+  severity: "high",
+  status: "pending",
+  description: "...",
+  location: "..."
+}
+```
+
+---
+
+## TIPS FOR BEST RESULTS:
+
+✅ Start with login page first
+✅ Test API integration on home page
+✅ Build history persistence next
+✅ Style consistently with Tailwind
+✅ Test on mobile
+✅ Add error boundaries for API failures
+✅ Use localStorage for offline functionality
+
+Good luck! 🚀
+```
+
+---
+
+## ALTERNATIVE: If Replit AI needs refinement:
+
+If the first AI generation needs adjustments, use follow-up prompts:
+
+**For styling issues:**
+> "Improve the styling of the home page. Make the upload section more prominent with a drag-and-drop visualization. Use gradient backgrounds and better spacing."
+
+**For missing features:**
+> "Add a detailed fraud report statistics dashboard showing total reports, verified cases, and resolution rate charts."
+
+**For API issues:**
+> "Add comprehensive error handling for API timeouts, network failures, and invalid responses. Show user-friendly error messages and retry buttons."
+
+---
