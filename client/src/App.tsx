@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/LoginPage";
 import HomePage from "@/pages/HomePage";
+import ResultsPage from "@/pages/ResultsPage";
 import HistoryPage from "@/pages/HistoryPage";
 import FraudReportPage from "@/pages/FraudReportPage";
 import AboutPage from "@/pages/AboutPage";
@@ -46,6 +47,9 @@ function Router() {
         <Route path="/login" component={LoginPage} />
         <Route path="/home">
           {() => <ProtectedRoute component={HomePage} />}
+        </Route>
+        <Route path="/results">
+          {() => <ProtectedRoute component={ResultsPage} />}
         </Route>
         <Route path="/history">
           {() => <ProtectedRoute component={HistoryPage} />}
