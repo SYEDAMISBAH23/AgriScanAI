@@ -1,0 +1,146 @@
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import ImageUploadZone from "@/components/ImageUploadZone";
+import ResultsCard from "@/components/ResultsCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+
+export default function HomePage() {
+  const { toast } = useToast();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [manualPLU, setManualPLU] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<any>(null);
+
+  const handleAnalyze = async () => {
+    if (!selectedImage) {
+      toast({
+        variant: "destructive",
+        title: "No image selected",
+        description: "Please upload an image to analyze.",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+    if (manualPLU) {
+      formData.append("manual_plu", manualPLU);
+    }
+
+    try {
+      const response = await fetch(
+        "https://iamsyedamisbah-agriscan-ai-backend.hf.space/infer_image",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Analysis failed");
+      }
+
+      const data = await response.json();
+      setResults(data);
+
+      const scanHistory = JSON.parse(
+        localStorage.getItem("agriscan_history") || "[]"
+      );
+      scanHistory.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleString(),
+        produce: data.produce_label,
+        verdict: data.verdict?.verdict || "UNKNOWN",
+        confidence: data.verdict?.verdict_confidence || 0,
+        plu: data.detected_plu,
+        fullData: data,
+      });
+      localStorage.setItem("agriscan_history", JSON.stringify(scanHistory));
+
+      toast({
+        title: "Analysis Complete",
+        description: `Detected: ${data.produce_label}`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: "Unable to analyze the image. Please try again.",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold">Scan Your Produce</h1>
+          <p className="text-muted-foreground">
+            Upload an image to verify organic authenticity
+          </p>
+        </div>
+
+        <Card>
+          <CardContent className="pt-6 space-y-6">
+            <ImageUploadZone
+              onImageSelect={setSelectedImage}
+              selectedImage={selectedImage}
+              onClearImage={() => setSelectedImage(null)}
+            />
+
+            <div className="space-y-2">
+              <Label htmlFor="manual-plu">Manual PLU Code (Optional)</Label>
+              <Input
+                id="manual-plu"
+                placeholder="Enter PLU code (e.g., 94011)"
+                value={manualPLU}
+                onChange={(e) => setManualPLU(e.target.value)}
+                data-testid="input-manual-plu"
+              />
+            </div>
+
+            <Button
+              onClick={handleAnalyze}
+              disabled={!selectedImage || isAnalyzing}
+              className="w-full"
+              size="lg"
+              data-testid="button-analyze"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Analyze Produce"
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {results && (
+          <ResultsCard
+            produceLabel={results.produce_label}
+            produceConfidence={results.produce_confidence}
+            verdict={results.verdict?.verdict || "UNKNOWN"}
+            verdictConfidence={results.verdict?.verdict_confidence || 0}
+            reliability={results.verdict?.reliability || "moderate"}
+            detectedPLU={results.detected_plu}
+            pluMeaning={results.plu_meaning}
+            reasoning={results.verdict?.reasoning || ""}
+            recommendation={results.verdict?.recommendation || ""}
+            nutrition={results.automatic_advice}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
