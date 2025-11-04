@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import Login from "@/pages/login";
+import ForgotPassword from "@/pages/forgot-password";
 import Home from "@/pages/home";
 import Results from "@/pages/results";
 import History from "@/pages/history";
@@ -35,6 +36,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/about" component={About} />
       <Route path="/" component={Home} />
       <Route path="/results" component={() => <ProtectedRoute component={Results} />} />
