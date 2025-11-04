@@ -197,13 +197,16 @@ export default function Home() {
               <Info className="h-4 w-4" />
             </Button>
             
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center gap-1 ml-2">
               {isAuthenticated ? (
                 <>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-testid="icon-logged-in"
+                  >
                     <UserCheck className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-medium text-primary">Logged In</span>
-                  </div>
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -215,10 +218,13 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    data-testid="icon-guest"
+                  >
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-xs font-medium text-muted-foreground">Guest</span>
-                  </div>
+                  </Button>
                   <Button
                     variant="default"
                     size="sm"
