@@ -12,6 +12,8 @@ The system addresses organic food fraud by combining computer vision with PLU co
 - **Simplified UI**: Removed bright gradients and flashy effects across all pages
 - **Fixed History Page**: Resolved undefined property errors in history card component
 - **About Page Redesign**: Simplified with subdued colors and clean layout
+- **Smooth Scrolling**: Added smooth scroll to scanner section when clicking "Start Scanning" button
+- **Updated Branding**: Changed app title to "AgriScan AI - Organic Produce Detection & Verification System" and updated logo from Leaf to ShieldCheck icon across all pages (home, login, about)
 
 ## User Preferences
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Leaf, ArrowRight, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, ArrowRight, Shield, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,11 +59,11 @@ export default function LoginPage() {
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <Leaf className="h-7 w-7 text-primary-foreground" />
+                <ShieldCheck className="h-7 w-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">AgriScan</h1>
-                <p className="text-sm text-muted-foreground">Organic Verification System</p>
+                <h1 className="text-2xl font-bold text-foreground">AgriScan AI</h1>
+                <p className="text-sm text-muted-foreground">Detection & Verification</p>
               </div>
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h2>

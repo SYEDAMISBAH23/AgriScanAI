@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, Leaf, BookCheck } from "lucide-react";
+import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
@@ -144,11 +144,11 @@ export default function Home() {
             whileHover={{ scale: 1.02 }}
           >
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <Leaf className="h-6 w-6 text-primary-foreground" />
+              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">AgriScan</h1>
-              <p className="text-xs text-muted-foreground">Organic Verification</p>
+              <h1 className="text-lg font-bold text-foreground">AgriScan AI</h1>
+              <p className="text-xs text-muted-foreground">Detection & Verification</p>
             </div>
           </motion.div>
 

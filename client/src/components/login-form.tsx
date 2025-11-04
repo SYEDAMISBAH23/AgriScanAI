@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Leaf, Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => void;
@@ -30,7 +30,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
               <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-                <Leaf className="h-10 w-10 text-white" />
+                <ShieldCheck className="h-10 w-10 text-white" />
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             AgriScan AI
           </h1>
           <p className="text-lg text-muted-foreground">
-            Intelligent produce scanning for healthier choices
+            Detection & Verification System
           </p>
         </div>
 

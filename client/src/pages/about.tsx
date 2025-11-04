@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Leaf, AlertTriangle, Shield, Sparkles, Heart, Brain, Zap, Target, Users } from "lucide-react";
+import { ArrowLeft, ShieldCheck, AlertTriangle, Shield, Sparkles, Heart, Brain, Zap, Target, Users } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function About() {
@@ -156,7 +156,7 @@ export default function About() {
                 onClick={() => setLocation("/")}
                 data-testid="button-start-scanning"
               >
-                <Leaf className="h-5 w-5 mr-2" />
+                <ShieldCheck className="h-5 w-5 mr-2" />
                 Start Scanning Now
               </Button>
             </div>
