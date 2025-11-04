@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,15 +26,19 @@ export function FraudReportDialog({
   const [vendorName, setVendorName] = useState("");
   const [location, setLocation] = useState("");
   const [email, setEmail] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [pricePaid, setPricePaid] = useState("");
+  const [fraudType, setFraudType] = useState("");
+  const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!vendorName.trim() || !location.trim()) {
+    if (!vendorName.trim() || !location.trim() || !fraudType || !description.trim()) {
       toast({
         title: "Missing information",
-        description: "Please fill in vendor name and location",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -47,6 +53,10 @@ export function FraudReportDialog({
         vendorName: vendorName.trim(),
         location: location.trim(),
         email: email.trim() || null,
+        purchaseDate: purchaseDate || null,
+        pricePaid: pricePaid || null,
+        fraudType,
+        description: description.trim(),
       });
 
       toast({
@@ -58,6 +68,10 @@ export function FraudReportDialog({
       setVendorName("");
       setLocation("");
       setEmail("");
+      setPurchaseDate("");
+      setPricePaid("");
+      setFraudType("");
+      setDescription("");
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -72,7 +86,7 @@ export function FraudReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <Flag className="h-6 w-6" />
@@ -108,6 +122,65 @@ export function FraudReportDialog({
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="purchase-date">Purchase Date</Label>
+              <Input
+                id="purchase-date"
+                type="date"
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                data-testid="input-purchase-date"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price-paid">Price Paid</Label>
+              <Input
+                id="price-paid"
+                type="text"
+                placeholder="e.g., $5.99"
+                value={pricePaid}
+                onChange={(e) => setPricePaid(e.target.value)}
+                data-testid="input-price-paid"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fraud-type">
+              Type of Issue <span className="text-destructive">*</span>
+            </Label>
+            <Select value={fraudType} onValueChange={setFraudType} required>
+              <SelectTrigger id="fraud-type" data-testid="select-fraud-type">
+                <SelectValue placeholder="Select issue type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mislabeled_organic">Mislabeled as Organic</SelectItem>
+                <SelectItem value="fake_plu">Fake/Incorrect PLU Code</SelectItem>
+                <SelectItem value="no_certification">No Organic Certification</SelectItem>
+                <SelectItem value="pesticide_residue">Pesticide Residue Found</SelectItem>
+                <SelectItem value="price_fraud">Price Manipulation</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">
+              Description <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Please describe what happened in detail..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              rows={4}
+              data-testid="input-description"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email (Optional)</Label>
             <Input
@@ -118,6 +191,7 @@ export function FraudReportDialog({
               onChange={(e) => setEmail(e.target.value)}
               data-testid="input-email"
             />
+            <p className="text-xs text-muted-foreground">We'll only use this to follow up on your report</p>
           </div>
 
           <Button
