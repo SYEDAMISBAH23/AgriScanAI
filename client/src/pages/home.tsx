@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, Leaf, BookCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function Home() {
   const { logout } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const scannerRef = useRef<HTMLElement>(null);
 
   const handleLogout = () => {
     logout();
@@ -24,6 +25,16 @@ export default function Home() {
       description: "You have been successfully logged out.",
     });
     setLocation("/login");
+  };
+
+  const scrollToScanner = () => {
+    setShowScanner(true);
+    setTimeout(() => {
+      scannerRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
   };
 
   const handleCapture = async (imageData: string) => {
@@ -208,7 +219,7 @@ export default function Home() {
               <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-4">
                 <Button
                   size="lg"
-                  onClick={() => setShowScanner(true)}
+                  onClick={scrollToScanner}
                   className="h-12 px-8 text-base font-semibold"
                   data-testid="button-start-scan"
                 >
@@ -249,6 +260,7 @@ export default function Home() {
         {/* Scanner Section - Shown when user clicks start */}
         {showScanner && (
           <motion.section
+            ref={scannerRef}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             className="py-8 px-4 sm:px-6 border-t bg-muted/30"
@@ -428,7 +440,7 @@ export default function Home() {
               </p>
               <Button
                 size="lg"
-                onClick={() => setShowScanner(true)}
+                onClick={scrollToScanner}
                 className="h-12 px-10 text-base font-semibold"
                 data-testid="button-cta-scan"
               >
