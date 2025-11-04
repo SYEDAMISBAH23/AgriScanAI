@@ -231,50 +231,67 @@ export function ScanResult({
                   transition={{ delay: 0.1 }}
                   data-testid="card-verification-analysis"
                 >
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="rounded-lg bg-primary/10 p-2.5">
+                  <Card>
+                    <CardContent className="p-0">
+                      {/* Header */}
+                      <div className="px-6 pt-6 pb-4 border-b">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-bold">Verification Analysis</h3>
                           <ShieldCheck className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold mb-2">
-                            Verification Analysis
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {activeVerdict.match === 'perfect_match' ? 'Perfect Match' : 
-                               activeVerdict.match === 'disagreement_plu_trusted' ? 'PLU Code Trusted' :
-                               activeVerdict.match === 'disagreement_model_trusted' ? 'AI Model Trusted' :
-                               'No PLU Code'}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {activeVerdict.reliability === 'very_high' ? 'Very High Confidence' :
-                               activeVerdict.reliability === 'high' ? 'High Confidence' :
-                               activeVerdict.reliability === 'moderate' ? 'Moderate Confidence' :
-                               'Low Confidence'}
-                            </Badge>
-                          </div>
                         </div>
                       </div>
 
-                      {activeVerdict.reasoning && (
-                        <div className="bg-muted/50 rounded-lg p-4 mb-3">
-                          <div className="flex gap-2">
-                            <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {activeVerdict.reasoning}
-                            </p>
+                      {/* Grid Layout */}
+                      <div className="grid md:grid-cols-2 gap-4 p-6">
+                        {/* Left Column - Status Badges */}
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground mb-2">PLU Status</div>
+                            <Badge variant="outline" className="text-sm">
+                              {activeVerdict.match === 'perfect_match' ? 'Perfect Match' : 
+                               activeVerdict.match === 'disagreement_plu_trusted' ? 'PLU Trusted' :
+                               activeVerdict.match === 'disagreement_model_trusted' ? 'AI Trusted' :
+                               'No PLU Code'}
+                            </Badge>
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground mb-2">Reliability</div>
+                            <Badge variant="outline" className="text-sm">
+                              {activeVerdict.reliability === 'very_high' ? 'Very High' :
+                               activeVerdict.reliability === 'high' ? 'High' :
+                               activeVerdict.reliability === 'moderate' ? 'Moderate' :
+                               'Low'} Confidence
+                            </Badge>
                           </div>
                         </div>
-                      )}
 
+                        {/* Right Column - Analysis */}
+                        <div>
+                          {activeVerdict.reasoning && (
+                            <div>
+                              <div className="text-xs font-medium text-muted-foreground mb-2">Analysis</div>
+                              <p className="text-sm leading-relaxed">
+                                {activeVerdict.reasoning}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Recommendation Footer */}
                       {activeVerdict.recommendation && (
-                        <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
-                          <p className="text-sm leading-relaxed">
-                            <span className="font-semibold">💡 Recommendation:</span>{' '}
-                            <span className="text-muted-foreground">{activeVerdict.recommendation}</span>
-                          </p>
+                        <div className="px-6 pb-6">
+                          <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                            <div className="flex gap-3">
+                              <span className="text-lg">💡</span>
+                              <div>
+                                <div className="font-semibold text-sm mb-1">Recommendation</div>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                  {activeVerdict.recommendation}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </CardContent>
