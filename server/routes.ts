@@ -94,6 +94,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email and new password are required" });
       }
 
+      // Check if user exists first
+      const user = await storage.getUserByUsername(email);
+      
+      if (!user) {
+        return res.status(404).json({ error: "No account found with this email" });
+      }
+
       // Update user's password
       await storage.updateUserPassword(email, newPassword);
       
