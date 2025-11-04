@@ -8,12 +8,21 @@ The system addresses organic food fraud by combining computer vision with PLU co
 
 ## Recent Updates (November 2025)
 
+### Database Migration (Latest)
+- **PostgreSQL Database Integration**: Migrated from localStorage to PostgreSQL for persistent, user-specific scan history
+- **User Authentication**: Implemented real user accounts with UUID primary keys stored in database
+- **Scan History Per User**: Each user now has their own isolated scan history that persists across devices and browsers
+- **Auto-Registration**: Users are automatically registered on first login with email and password
+- **Password Validation**: Existing users must provide correct password to access their account
+
+### Earlier Updates
 - **Complete Color Palette Redesign**: Updated to sage green, green, and cream color scheme
 - **Simplified UI**: Removed bright gradients and flashy effects across all pages
 - **Fixed History Page**: Resolved undefined property errors in history card component
 - **About Page Redesign**: Simplified with subdued colors and clean layout
 - **Smooth Scrolling**: Added smooth scroll to scanner section when clicking "Start Scanning" button
 - **Updated Branding**: Changed app title to "AgriScan AI - Organic Produce Detection & Verification System" and updated logo from Leaf to ShieldCheck icon across all pages (home, login, about)
+- **Manual PLU Entry**: Added ability to manually enter PLU codes when not detected in images
 
 ## User Preferences
 
@@ -58,11 +67,14 @@ Preferred communication style: Simple, everyday language.
 
 **API Strategy**: The application currently uses an external backend API hosted on Hugging Face Spaces (`https://iamsyedamisbah-agriscan-ai-backend.hf.space`) for produce verification inference. The Express server is minimal, primarily serving the built React frontend.
 
-**Storage Interface**: Abstracted storage layer with an in-memory implementation (`MemStorage`). The interface defines CRUD operations for users, allowing future database integration without frontend changes.
+**Storage Interface**: Abstracted storage layer with `DatabaseStorage` implementation using PostgreSQL. The interface defines CRUD operations for users, scan history, and fraud reports with proper user isolation.
 
-**Database Schema**: Drizzle ORM configured for PostgreSQL with a basic users table (id, username, password). The schema is defined but not actively used since the application relies on localStorage for session management and the external API for produce verification.
+**Database Schema**: Drizzle ORM configured for PostgreSQL with three main tables:
+- **users**: User accounts (id: UUID primary key, username: email, password)
+- **scan_history**: User-specific scan records with foreign key to users table (id, userId, produceLabel, produceConfidence, organicLabel, detectedPlu, nutritionFacts, cleaningTips, imageUrl, createdAt)
+- **fraud_reports**: Community fraud reports (id, userId, email, produceLabel, organicLabel, vendorName, location, description, createdAt)
 
-**Session Management**: Currently implemented client-side via localStorage. The backend includes session middleware setup but authentication is handled as a mock implementation in the frontend.
+**Session Management**: Hybrid approach - user identity (email and UUID) stored in localStorage for session persistence, while all scan history and user data persists in PostgreSQL database. Backend API routes validate userId on history operations.
 
 ### Data Flow
 
@@ -76,8 +88,9 @@ Preferred communication style: Simple, everyday language.
    - AI reasoning for the verdict
    - Cleaning/handling recommendations
    - Nutritional information
-4. Results are stored in localStorage and displayed on the results page
-5. Past scans are maintained in history for user reference
+4. Results are displayed on the results page
+5. User can save scan to their history (stored in PostgreSQL database with userId)
+6. Past scans are maintained in user-specific history accessible from any device
 
 ### Design Patterns
 
@@ -120,9 +133,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Database
 
-**PostgreSQL**: Configured via Drizzle ORM and Neon serverless driver (`@neondatabase/serverless`), though not actively storing application data. User authentication and scan history currently persist in localStorage rather than the database.
+**PostgreSQL**: Actively used via Drizzle ORM and Neon serverless driver (`@neondatabase/serverless`) to store user accounts, scan history, and fraud reports. Each user's scan history is isolated by userId foreign key constraint.
 
-**Migration Strategy**: Drizzle Kit handles schema migrations with configuration pointing to `./migrations` directory.
+**Migration Strategy**: Drizzle Kit handles schema migrations with `npm run db:push` command. Database schema changes are automatically applied without manual SQL migrations.
+
+**Data Isolation**: User-specific data isolation enforced at database level - scan history queries filter by userId, ensuring each user sees only their own scans across all devices and browser sessions.
 
 ### Fonts
 
