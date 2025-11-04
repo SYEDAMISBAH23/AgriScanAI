@@ -50,29 +50,28 @@ export default function History() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-black/5">
-        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setLocation("/")}
             data-testid="button-back"
-            className="h-11 w-11"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Scan History</h1>
+          <h1 className="text-lg font-semibold">Scan History</h1>
           <ThemeToggle />
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="mb-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 h-12 p-1 bg-muted/50 backdrop-blur-sm">
-            <TabsTrigger value="all" data-testid="filter-all" className="text-base font-medium">All</TabsTrigger>
-            <TabsTrigger value="organic" data-testid="filter-organic" className="text-base font-medium">Organic</TabsTrigger>
-            <TabsTrigger value="non-organic" data-testid="filter-non-organic" className="text-base font-medium">Non-Organic</TabsTrigger>
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+            <TabsTrigger value="all" data-testid="filter-all">All</TabsTrigger>
+            <TabsTrigger value="organic" data-testid="filter-organic">Organic</TabsTrigger>
+            <TabsTrigger value="non-organic" data-testid="filter-non-organic">Non-Organic</TabsTrigger>
           </TabsList>
         </Tabs>
 
