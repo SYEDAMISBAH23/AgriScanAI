@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { CameraCapture } from "@/components/camera-capture";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import logoImage from "@assets/image_1762241916124.png";
+import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();

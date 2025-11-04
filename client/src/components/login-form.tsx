@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Sparkles, ShieldCheck } from "lucide-react";
-import logoImage from "@assets/image_1762241916124.png";
+import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => void;
