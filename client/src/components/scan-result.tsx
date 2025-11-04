@@ -301,12 +301,9 @@ export function ScanResult({
 
               <Card>
                 <CardContent className="p-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-8">
                     <ConfidenceMeter label="Produce Identification" confidence={produceConfidence} />
                     <ConfidenceMeter label="Organic Detection" confidence={organicConfidence} />
-                    {pluConfidence && (
-                      <ConfidenceMeter label="PLU Recognition" confidence={pluConfidence} />
-                    )}
                   </div>
                 </CardContent>
               </Card>
