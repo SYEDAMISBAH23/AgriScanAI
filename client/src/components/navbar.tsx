@@ -13,7 +13,7 @@ import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 
 export function Navbar() {
   const [location, setLocation] = useLocation();
-  const { logout, isAuthenticated } = useAuth();
+  const { logout, isAuthenticated, user } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -125,7 +125,7 @@ export function Navbar() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Logged In</p>
+                    <p className="font-medium">{user?.email || "Logged In"}</p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
