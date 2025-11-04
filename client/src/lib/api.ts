@@ -22,17 +22,40 @@ export interface ScanResult {
 
 const API_BASE_URL = "https://iamsyedamisbah-agriscan-ai-backend.hf.space";
 
+// Helper function to convert File to base64
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Extract just the base64 part (remove "data:image/...;base64," prefix)
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const AgriScanAPI = {
   async scanProduce(imageFile: File, manualPLU?: string): Promise<ScanResult> {
-    const formData = new FormData();
-    formData.append("file", imageFile);
+    // Convert image to base64
+    const base64Image = await fileToBase64(imageFile);
+    
+    const payload: any = {
+      image: base64Image,
+    };
+    
     if (manualPLU) {
-      formData.append("plu_code", manualPLU);
+      payload.plu_code = manualPLU;
     }
 
     const response = await fetch(`${API_BASE_URL}/infer_image`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
