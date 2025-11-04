@@ -1,37 +1,22 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, User, UserCheck, Home as HomeIcon } from "lucide-react";
+import { Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { AgriScanAPI } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CameraCapture } from "@/components/camera-capture";
+import { Navbar } from "@/components/navbar";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 
 export default function Home() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { logout, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const scannerRef = useRef<HTMLElement>(null);
-
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    setLocation("/login");
-  };
 
   const scrollToScanner = () => {
     setShowScanner(true);
@@ -151,161 +136,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Top Navigation Bar */}
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="sticky top-0 z-50 bg-card border-b"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <motion.div
-            className="flex items-center gap-3"
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden">
-              <img src={logoImage} alt="AgriScan AI" className="h-8 w-8 object-contain" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-foreground">AgriScan AI</h1>
-              <p className="text-xs text-muted-foreground">Scan. Identify. Eat Healthy.</p>
-            </div>
-          </motion.div>
-
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setLocation("/")}
-                  data-testid="button-home"
-                  className={location === "/" ? "bg-primary/10" : ""}
-                >
-                  <HomeIcon className={location === "/" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Home</p>
-              </TooltipContent>
-            </Tooltip>
-            {isAuthenticated && (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLocation("/history")}
-                      data-testid="button-history"
-                      className={location === "/history" ? "bg-primary/10" : ""}
-                    >
-                      <History className={location === "/history" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>History</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLocation("/fraud-reports")}
-                      data-testid="button-fraud-reports"
-                      className={location === "/fraud-reports" ? "bg-primary/10" : ""}
-                    >
-                      <Flag className={location === "/fraud-reports" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Fraud Reports</p>
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setLocation("/about")}
-                  data-testid="button-about"
-                  className={location === "/about" ? "bg-primary/10" : ""}
-                >
-                  <Info className={location === "/about" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>About</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <div className="flex items-center gap-1 ml-2">
-              {isAuthenticated ? (
-                <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        data-testid="icon-logged-in"
-                      >
-                        <UserCheck className="h-4 w-4 text-primary" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Logged In</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleLogout}
-                        data-testid="button-logout"
-                      >
-                        <LogOut className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Logout</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </>
-              ) : (
-                <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        data-testid="icon-guest"
-                      >
-                        <User className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Guest</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setLocation("/login")}
-                    data-testid="button-login"
-                  >
-                    Sign In
-                  </Button>
-                </>
-              )}
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </motion.header>
+      <Navbar />
 
       {/* Main Content - Scrollable Sections */}
       <main className="flex-1">

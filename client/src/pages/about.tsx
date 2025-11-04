@@ -1,27 +1,14 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShieldCheck, AlertTriangle, Shield, Sparkles, Heart, Brain, Zap, Target, Users } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ShieldCheck, AlertTriangle, Shield, Sparkles, Heart, Brain, Zap, Target, Users } from "lucide-react";
+import { Navbar } from "@/components/navbar";
 
 export default function About() {
   const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <ThemeToggle />
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1">

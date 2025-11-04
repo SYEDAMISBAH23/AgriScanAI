@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { ScanResult } from "@/components/scan-result";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Loader2 } from "lucide-react";
+import { Navbar } from "@/components/navbar";
 import { useToast } from "@/hooks/use-toast";
 import { AgriScanAPI, type ScanResult as ScanResultType } from "@/lib/api";
 
@@ -166,20 +165,7 @@ Scanned: ${new Date(scanData.timestamp).toLocaleString()}
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">Scan Results</h1>
-          <ThemeToggle />
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         <ScanResult

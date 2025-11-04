@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Flag, MapPin, Mail, Calendar } from "lucide-react";
+import { Flag, MapPin, Mail, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Navbar } from "@/components/navbar";
 import type { FraudReport } from "@shared/schema";
 
 export default function FraudReports() {
@@ -26,20 +26,7 @@ export default function FraudReports() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">Fraud Reports</h1>
-          <ThemeToggle />
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         <div className="mb-6">
