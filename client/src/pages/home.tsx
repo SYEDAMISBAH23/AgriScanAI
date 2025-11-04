@@ -374,20 +374,20 @@ export default function Home() {
         </section>
 
         {/* Community Fraud Reporting Section */}
-        <section className="py-20 px-4 sm:px-6 bg-destructive/5">
+        <section className="py-12 px-4 sm:px-6 bg-destructive/5">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial="initial"
               whileInView="animate"
               viewport={{ once: true }}
               variants={stagger}
-              className="text-center mb-12"
+              className="text-center mb-8"
             >
-              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded-full mb-6">
+              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded-full mb-4">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="text-sm font-bold">Community Protection</span>
               </motion.div>
-              <motion.h3 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold mb-4">
+              <motion.h3 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold mb-3">
                 Report Suspicious Produce
               </motion.h3>
               <motion.p variants={fadeInUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -400,7 +400,7 @@ export default function Home() {
               whileInView="animate"
               viewport={{ once: true }}
               variants={stagger}
-              className="grid md:grid-cols-3 gap-6 mb-10"
+              className="grid md:grid-cols-3 gap-6 mb-8"
             >
               {[
                 {
