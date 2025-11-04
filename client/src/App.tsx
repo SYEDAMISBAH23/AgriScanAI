@@ -12,6 +12,8 @@ import HistoryPage from "@/pages/HistoryPage";
 import FraudReportPage from "@/pages/FraudReportPage";
 import AboutPage from "@/pages/AboutPage";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/lib/auth-context";
+import { ThemeProvider } from "@/lib/theme-provider";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const userEmail = localStorage.getItem("agriscan_user");
@@ -75,10 +77,14 @@ function Router() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

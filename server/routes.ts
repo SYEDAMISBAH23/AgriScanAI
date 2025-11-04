@@ -3,13 +3,78 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Login
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Simple mock authentication
+      if (email && password) {
+        res.json({ success: true, email });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
+    } catch (error: any) {
+      res.status(401).json({ error: "Login failed" });
+    }
+  });
+
+  // History - GET
+  app.get("/api/history", async (req, res) => {
+    try {
+      const history = await storage.getHistory();
+      const formattedHistory = history.map(scan => ({
+        id: scan.id,
+        produce_label: scan.produceLabel,
+        produce_confidence: scan.produceConfidence,
+        organic_label: scan.organicLabel,
+        organic_confidence: scan.organicConfidence,
+        detected_plu: scan.detectedPlu,
+        plu_confidence: scan.pluConfidence,
+        plu_meaning: scan.pluMeaning,
+        automatic_advice: scan.nutritionFacts || "",
+        timestamp: scan.createdAt.toISOString(),
+        imageUrl: scan.imageUrl,
+      }));
+      res.json({ history: formattedHistory });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch history" });
+    }
+  });
+
+  // History - POST
+  app.post("/api/history", async (req, res) => {
+    try {
+      const scanData = req.body;
+      await storage.saveHistory(scanData);
+      res.json({ success: true, message: "Scan saved" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save history" });
+    }
+  });
+
+  // Fraud Reports - GET
+  app.get("/api/fraud-reports", async (req, res) => {
+    try {
+      const reports = await storage.getFraudReports();
+      res.json({ reports });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch fraud reports" });
+    }
+  });
+
+  // Fraud Reports - POST
+  app.post("/api/fraud-reports", async (req, res) => {
+    try {
+      const reportData = req.body;
+      const report = await storage.saveFraudReport(reportData);
+      res.json({ success: true, report });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save fraud report" });
+    }
+  });
 
   const httpServer = createServer(app);
-
   return httpServer;
 }
