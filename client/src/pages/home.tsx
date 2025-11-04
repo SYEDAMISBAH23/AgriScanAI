@@ -111,7 +111,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-accent/8 pointer-events-none" />
       <motion.div
         animate={{
           backgroundPosition: ["0% 0%", "100% 100%"],
@@ -121,7 +121,7 @@ export default function Home() {
           repeat: Infinity,
           repeatType: "reverse",
         }}
-        className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-amber-500/5 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-tr from-accent/8 via-transparent to-primary/8 pointer-events-none"
         style={{ backgroundSize: "200% 200%" }}
       />
 
@@ -136,12 +136,12 @@ export default function Home() {
             <motion.div
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30"
+              className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/30"
             >
               <Sparkles className="h-6 w-6 text-white" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 AgriScan AI
               </h1>
               <p className="text-xs text-muted-foreground font-medium">Powered by Intelligence</p>
@@ -208,16 +208,16 @@ export default function Home() {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/20 rounded-full mb-6"
             >
-              <Zap className="h-4 w-4 text-emerald-500" />
-              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-bold text-primary">
                 AI-Powered Produce Analysis
               </span>
             </motion.div>
 
             <h2 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
                 Scan Your Produce
               </span>
             </h2>
@@ -268,7 +268,7 @@ export default function Home() {
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="h-20 w-20 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-6"
+                    className="h-20 w-20 border-4 border-primary border-t-transparent rounded-full mx-auto mb-6"
                   />
                   <motion.p
                     initial={{ opacity: 0 }}
@@ -296,7 +296,7 @@ export default function Home() {
                           repeat: Infinity,
                           delay: i * 0.2,
                         }}
-                        className="h-3 w-3 rounded-full bg-emerald-500"
+                        className="h-3 w-3 rounded-full bg-primary"
                       />
                     ))}
                   </div>
@@ -322,19 +322,19 @@ export default function Home() {
                 icon: Sparkles,
                 title: "AI-Powered",
                 description: "Advanced machine learning models trained on thousands of produce images",
-                color: "from-purple-500 to-purple-600",
+                color: "from-accent to-accent/80",
               },
               {
                 icon: Zap,
                 title: "Instant Results",
                 description: "Get detailed analysis, nutrition facts, and safety tips in seconds",
-                color: "from-blue-500 to-blue-600",
+                color: "from-primary to-primary/80",
               },
               {
                 icon: Camera,
                 title: "Easy to Use",
                 description: "Simply snap a photo or upload an image to get started",
-                color: "from-emerald-500 to-emerald-600",
+                color: "from-primary/80 to-primary",
               },
             ].map((card, i) => (
               <motion.div

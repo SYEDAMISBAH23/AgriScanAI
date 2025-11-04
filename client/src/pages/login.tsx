@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Leaf } from "lucide-react";
+import { Scan, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,6 @@ export default function LoginPage() {
       description: "Login successful.",
     });
     
-    // Give React time to update state before navigation
     setTimeout(() => {
       setIsLoading(false);
       window.location.href = "/";
@@ -42,25 +41,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/5 to-transparent" />
+      
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      
+      <Card className="w-full max-w-md relative z-10 shadow-xl">
+        <CardHeader className="text-center space-y-6 pb-8">
           <div className="flex justify-center">
-            <div className="bg-primary text-primary-foreground p-3 rounded-full">
-              <Leaf className="h-8 w-8" />
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+              <div className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-4 rounded-2xl shadow-lg">
+                <Scan className="h-10 w-10" />
+              </div>
             </div>
           </div>
-          <div>
-            <CardTitle className="text-3xl font-bold">AgriScan</CardTitle>
-            <CardDescription className="text-base mt-2">
-              AI-Powered Organic Produce Verification
+          <div className="space-y-2">
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              AgriScan
+            </CardTitle>
+            <CardDescription className="text-base flex items-center justify-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI-Powered Organic Verification
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+        <CardContent className="pb-8">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -68,10 +81,11 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 data-testid="input-email"
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -79,16 +93,20 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 data-testid="input-password"
+                className="h-11"
               />
             </div>
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-11 text-base font-medium shadow-lg shadow-primary/20"
               disabled={isLoading}
               data-testid="button-login"
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Logging in..." : "Sign In"}
             </Button>
+            <p className="text-center text-xs text-muted-foreground mt-4">
+              Demo: Use any email and password to continue
+            </p>
           </form>
         </CardContent>
       </Card>
