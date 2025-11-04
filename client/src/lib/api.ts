@@ -94,6 +94,30 @@ export const AgriScanAPI = {
     return response.json();
   },
 
+  async verifyPLU(pluCode: string): Promise<{ 
+    plu_code: string;
+    meaning: string; 
+    is_organic: boolean; 
+    explanation: string 
+  }> {
+    const response = await fetch(`${API_BASE_URL}/verify_plu`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        plu_code: pluCode,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to verify PLU code");
+    }
+
+    return response.json();
+  },
+
   async saveToHistory(scanData: ScanResult): Promise<void> {
     const history = localStorage.getItem("scanHistory");
     const historyArray = history ? JSON.parse(history) : [];
