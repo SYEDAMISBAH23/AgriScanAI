@@ -120,6 +120,11 @@ export const AgriScanAPI = {
     return response.json();
   },
 
+  async getHistory(): Promise<any[]> {
+    const history = localStorage.getItem("scanHistory");
+    return history ? JSON.parse(history) : [];
+  },
+
   async saveToHistory(scanData: ScanResult): Promise<void> {
     const history = localStorage.getItem("scanHistory");
     const historyArray = history ? JSON.parse(history) : [];
