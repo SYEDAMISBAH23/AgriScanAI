@@ -19,7 +19,7 @@ export function HistoryCard({
   createdAt,
   onClick,
 }: HistoryCardProps) {
-  const isOrganic = organicLabel.toLowerCase() === "organic";
+  const isOrganic = organicLabel?.toLowerCase() === "organic";
 
   return (
     <Card

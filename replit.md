@@ -6,6 +6,13 @@ AgriScan is a web-based application that uses AI-powered image analysis to verif
 
 The system addresses organic food fraud by combining computer vision with PLU code verification, offering consumers a trustworthy tool to validate their organic produce purchases before consumption.
 
+## Recent Updates (November 2025)
+
+- **Complete Color Palette Redesign**: Updated to sage green, green, and cream color scheme
+- **Simplified UI**: Removed bright gradients and flashy effects across all pages
+- **Fixed History Page**: Resolved undefined property errors in history card component
+- **About Page Redesign**: Simplified with subdued colors and clean layout
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -94,10 +94,10 @@ export default function History() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredHistory.map((item) => (
+            {filteredHistory.map((item, index) => (
               <HistoryCard
-                key={item.id}
-                id={item.id.toString()}
+                key={item.id || index}
+                id={item.id?.toString() || index.toString()}
                 imageUrl={(item as any).imageUrl || "/placeholder-produce.jpg"}
                 produceLabel={item.produce_label}
                 organicLabel={item.organic_label}
