@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +29,12 @@ export default function LoginPage() {
 
     setIsLoading(true);
     setTimeout(() => {
-      localStorage.setItem("agriscan_user", email);
+      login(email);
       toast({
         title: "Welcome to AgriScan!",
         description: "Login successful.",
       });
-      setLocation("/home");
+      setLocation("/");
     }, 500);
   };
 
