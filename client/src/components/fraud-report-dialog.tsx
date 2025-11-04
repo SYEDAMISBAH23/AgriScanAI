@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface FraudReportDialogProps {
   open: boolean;
@@ -58,6 +58,9 @@ export function FraudReportDialog({
         fraudType,
         description: description.trim(),
       });
+
+      // Invalidate fraud reports query to refresh the list
+      await queryClient.invalidateQueries({ queryKey: ["/api/fraud-reports"] });
 
       toast({
         title: "Report submitted",
