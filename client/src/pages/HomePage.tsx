@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 import ImageUploadZone from "@/components/ImageUploadZone";
-import ResultsCard from "@/components/ResultsCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function HomePage() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [manualPLU, setManualPLU] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState<any>(null);
 
   const handleAnalyze = async () => {
     if (!selectedImage) {
@@ -47,7 +47,9 @@ export default function HomePage() {
       }
 
       const data = await response.json();
-      setResults(data);
+
+      // Store latest result for results page
+      localStorage.setItem("agriscan_latest_result", JSON.stringify(data));
 
       const scanHistory = JSON.parse(
         localStorage.getItem("agriscan_history") || "[]"
@@ -67,6 +69,9 @@ export default function HomePage() {
         title: "Analysis Complete",
         description: `Detected: ${data.produce_label}`,
       });
+
+      // Navigate to results page
+      setLocation("/results");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -125,21 +130,6 @@ export default function HomePage() {
             </Button>
           </CardContent>
         </Card>
-
-        {results && (
-          <ResultsCard
-            produceLabel={results.produce_label}
-            produceConfidence={results.produce_confidence}
-            verdict={results.verdict?.verdict || "UNKNOWN"}
-            verdictConfidence={results.verdict?.verdict_confidence || 0}
-            reliability={results.verdict?.reliability || "moderate"}
-            detectedPLU={results.detected_plu}
-            pluMeaning={results.plu_meaning}
-            reasoning={results.verdict?.reasoning || ""}
-            recommendation={results.verdict?.recommendation || ""}
-            nutrition={results.automatic_advice}
-          />
-        )}
       </div>
     </div>
   );
