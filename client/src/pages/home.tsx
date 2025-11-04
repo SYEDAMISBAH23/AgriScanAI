@@ -17,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 
 export default function Home() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { logout, isAuthenticated } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
@@ -180,8 +180,9 @@ export default function Home() {
                   size="icon"
                   onClick={() => setLocation("/")}
                   data-testid="button-home"
+                  className={location === "/" ? "bg-primary/10" : ""}
                 >
-                  <HomeIcon className="h-4 w-4" />
+                  <HomeIcon className={location === "/" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -197,8 +198,9 @@ export default function Home() {
                       size="icon"
                       onClick={() => setLocation("/history")}
                       data-testid="button-history"
+                      className={location === "/history" ? "bg-primary/10" : ""}
                     >
-                      <History className="h-4 w-4" />
+                      <History className={location === "/history" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -212,8 +214,9 @@ export default function Home() {
                       size="icon"
                       onClick={() => setLocation("/fraud-reports")}
                       data-testid="button-fraud-reports"
+                      className={location === "/fraud-reports" ? "bg-primary/10" : ""}
                     >
-                      <Flag className="h-4 w-4" />
+                      <Flag className={location === "/fraud-reports" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -229,8 +232,9 @@ export default function Home() {
                   size="icon"
                   onClick={() => setLocation("/about")}
                   data-testid="button-about"
+                  className={location === "/about" ? "bg-primary/10" : ""}
                 >
-                  <Info className="h-4 w-4" />
+                  <Info className={location === "/about" ? "h-4 w-4 text-primary" : "h-4 w-4"} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
