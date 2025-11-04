@@ -43,7 +43,9 @@ export default function HomePage() {
       );
 
       if (!response.ok) {
-        throw new Error("Analysis failed");
+        const errorText = await response.text().catch(() => "Unknown error");
+        console.error("API Error:", response.status, errorText);
+        throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -73,10 +75,14 @@ export default function HomePage() {
       // Navigate to results page
       setLocation("/results");
     } catch (error) {
+      console.error("Analysis error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
         variant: "destructive",
         title: "Analysis Failed",
-        description: "Unable to analyze the image. Please try again.",
+        description: errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch") 
+          ? "Unable to connect to the analysis service. Please check your internet connection and try again."
+          : `Unable to analyze the image: ${errorMessage}`,
       });
     } finally {
       setIsAnalyzing(false);
