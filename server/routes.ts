@@ -62,6 +62,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verify Email (for password reset)
+  app.post("/api/verify-email", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByUsername(email);
+      
+      if (!user) {
+        return res.status(404).json({ error: "No account found with this email" });
+      }
+      
+      res.json({ success: true, message: "Email verified" });
+    } catch (error: any) {
+      console.error("Email verification error:", error);
+      res.status(500).json({ error: "Email verification failed" });
+    }
+  });
+
+  // Reset Password
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { email, newPassword } = req.body;
+      
+      if (!email || !newPassword) {
+        return res.status(400).json({ error: "Email and new password are required" });
+      }
+
+      // Update user's password
+      await storage.updateUserPassword(email, newPassword);
+      
+      res.json({ success: true, message: "Password reset successfully" });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ error: "Password reset failed" });
+    }
+  });
+
   // History - GET (user-specific)
   app.get("/api/history", async (req, res) => {
     try {
