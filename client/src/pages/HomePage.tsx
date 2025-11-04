@@ -45,7 +45,20 @@ export default function HomePage() {
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
         console.error("API Error:", response.status, errorText);
-        throw new Error(`Analysis failed: ${response.status} ${response.statusText}`);
+        
+        // Try to parse the error message
+        let errorMsg = `Status ${response.status}`;
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.error) {
+            errorMsg = errorJson.error;
+          }
+        } catch {
+          // Not JSON, use status text
+          errorMsg = response.statusText || errorMsg;
+        }
+        
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
@@ -77,12 +90,23 @@ export default function HomePage() {
     } catch (error) {
       console.error("Analysis error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
+      let title = "Analysis Failed";
+      let description = "Unable to analyze the image.";
+      
+      if (errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch")) {
+        description = "Unable to connect to the analysis service. Please check your internet connection and try again.";
+      } else if (errorMessage.includes("cannot identify image file")) {
+        title = "Image Format Issue";
+        description = "The AI service couldn't read your image. Please try:\n• Using a different image format (JPG, PNG, or WebP recommended)\n• Taking a clearer photo with better lighting\n• Ensuring the file isn't corrupted";
+      } else {
+        description = errorMessage;
+      }
+      
       toast({
         variant: "destructive",
-        title: "Analysis Failed",
-        description: errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch") 
-          ? "Unable to connect to the analysis service. Please check your internet connection and try again."
-          : `Unable to analyze the image: ${errorMessage}`,
+        title,
+        description,
       });
     } finally {
       setIsAnalyzing(false);

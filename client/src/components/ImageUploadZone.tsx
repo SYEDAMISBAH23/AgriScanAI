@@ -37,6 +37,20 @@ export default function ImageUploadZone({
   };
 
   const handleFile = (file: File) => {
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert("Image file is too large. Please use an image smaller than 10MB.");
+      return;
+    }
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert("Please use a JPG, PNG, or WebP image format.");
+      return;
+    }
+    
     onImageSelect(file);
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -116,7 +130,7 @@ export default function ImageUploadZone({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             className="hidden"
             onChange={handleFileSelect}
             data-testid="input-file"
@@ -124,7 +138,7 @@ export default function ImageUploadZone({
           <input
             ref={cameraInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             capture="environment"
             className="hidden"
             onChange={handleFileSelect}
