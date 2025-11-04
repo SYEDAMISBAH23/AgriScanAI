@@ -149,7 +149,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AgriScan AI</h1>
-              <p className="text-xs text-muted-foreground">Detection & Verification</p>
+              <p className="text-xs text-muted-foreground">Scan. Identify. Eat Healthy.</p>
             </div>
           </motion.div>
 

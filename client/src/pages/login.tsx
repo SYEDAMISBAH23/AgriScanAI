@@ -64,7 +64,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">AgriScan AI</h1>
-                <p className="text-sm text-muted-foreground">Detection & Verification</p>
+                <p className="text-sm text-muted-foreground">Scan. Identify. Eat Healthy.</p>
               </div>
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h2>

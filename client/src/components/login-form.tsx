@@ -39,7 +39,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             AgriScan AI
           </h1>
           <p className="text-lg text-muted-foreground">
-            Detection & Verification System
+            Scan. Identify. Eat Healthy.
           </p>
         </div>
 
