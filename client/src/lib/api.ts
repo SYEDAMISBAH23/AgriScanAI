@@ -75,20 +75,21 @@ export const AgriScanAPI = {
     organicStatus: string,
     message: string
   ): Promise<{ response: string }> {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
+    const response = await fetch(`${API_BASE_URL}/chat_advice`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        produce,
+        produce_name: produce,
         organic_status: organicStatus,
-        message,
+        query: message,
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to get chat response");
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to get chat response");
     }
 
     return response.json();
