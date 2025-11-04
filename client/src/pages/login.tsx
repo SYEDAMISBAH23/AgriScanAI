@@ -31,7 +31,16 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
       });
 
-      setLocation("/");
+      // Check if there's a pending scan result
+      const pendingScan = sessionStorage.getItem("currentScan");
+      if (pendingScan) {
+        // Redirect to results to show the scan they just completed
+        setLocation("/results");
+      } else {
+        // No pending scan, go to home page
+        setLocation("/");
+      }
+      
       setIsLoading(false);
     }, 800);
   };

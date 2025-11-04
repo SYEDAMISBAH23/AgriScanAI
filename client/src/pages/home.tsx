@@ -14,7 +14,7 @@ import logoImage from "@assets/image-removebg-preview_1762242218411.png";
 export default function Home() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const scannerRef = useRef<HTMLElement>(null);
@@ -59,7 +59,14 @@ export default function Home() {
       });
 
       setTimeout(() => {
-        setLocation("/results");
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+          // Redirect to login, they'll see results after logging in
+          setLocation("/login");
+        } else {
+          // Already logged in, go to results
+          setLocation("/results");
+        }
       }, 500);
 
     } catch (error: any) {
@@ -101,7 +108,14 @@ export default function Home() {
       });
 
       setTimeout(() => {
-        setLocation("/results");
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+          // Redirect to login, they'll see results after logging in
+          setLocation("/login");
+        } else {
+          // Already logged in, go to results
+          setLocation("/results");
+        }
       }, 500);
 
     } catch (error: any) {
@@ -154,22 +168,26 @@ export default function Home() {
           </motion.div>
 
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation("/history")}
-              data-testid="button-history"
-            >
-              <History className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation("/fraud-reports")}
-              data-testid="button-fraud-reports"
-            >
-              <Flag className="h-4 w-4" />
-            </Button>
+            {isAuthenticated && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/history")}
+                  data-testid="button-history"
+                >
+                  <History className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/fraud-reports")}
+                  data-testid="button-fraud-reports"
+                >
+                  <Flag className="h-4 w-4" />
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -178,14 +196,24 @@ export default function Home() {
             >
               <Info className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              data-testid="button-logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/login")}
+                data-testid="button-login"
+              >
+                Sign In
+              </Button>
+            )}
             <ThemeToggle />
           </div>
         </div>
