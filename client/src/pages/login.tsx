@@ -28,14 +28,17 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    login(email);
+    toast({
+      title: "Welcome to AgriScan!",
+      description: "Login successful.",
+    });
+    
+    // Give React time to update state before navigation
     setTimeout(() => {
-      login(email);
-      toast({
-        title: "Welcome to AgriScan!",
-        description: "Login successful.",
-      });
-      setLocation("/");
-    }, 500);
+      setIsLoading(false);
+      window.location.href = "/";
+    }, 100);
   };
 
   return (
