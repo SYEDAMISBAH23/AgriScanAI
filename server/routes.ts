@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { getChatCompletion } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -72,6 +73,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, report });
     } catch (error) {
       res.status(500).json({ error: "Failed to save fraud report" });
+    }
+  });
+
+  // Chat endpoint using OpenAI
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message, produceName, organicStatus } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Build context from produce information
+      let context = "";
+      if (produceName || organicStatus) {
+        context = `Current produce being discussed: ${produceName || "Unknown"}. `;
+        if (organicStatus) {
+          context += `Organic status: ${organicStatus}. `;
+        }
+      }
+      
+      const response = await getChatCompletion(message, context);
+      res.json({ response });
+    } catch (error: any) {
+      console.error("Chat error:", error);
+      res.status(500).json({ error: "Failed to get chat response" });
     }
   });
 

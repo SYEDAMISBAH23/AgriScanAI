@@ -75,15 +75,16 @@ export const AgriScanAPI = {
     organicStatus: string,
     message: string
   ): Promise<{ response: string }> {
-    const response = await fetch(`${API_BASE_URL}/chat_advice`, {
+    // Call our backend which uses OpenAI
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        produce_name: produce,
-        organic_status: organicStatus,
-        query: message,
+        message: message,
+        produceName: produce,
+        organicStatus: organicStatus,
       }),
     });
 
