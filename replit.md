@@ -21,9 +21,10 @@ Preferred communication style: Simple, everyday language.
 **UI Component System**: Shadcn/ui component library with Radix UI primitives, providing accessible, customizable components. The design follows a subdued, professional aesthetic with a calm information-first approach.
 
 **Styling**: Tailwind CSS with custom design tokens for consistency. The color system uses:
-- **Primary**: Deep forest green (hsl 160 18% 24%) - professional and natural
-- **Accent**: Warm tan (hsl 28 32% 58%) - subtle warmth
-- **Neutrals**: Slate and stone grays for backgrounds and text
+- **Primary**: Vibrant green (hsl 140 55% 42%) - fresh, natural brand color
+- **Accent**: Sage green (hsl 95 22% 68%) - muted grayish-green for secondary elements
+- **Background**: Cream (hsl 45 35% 96%) - warm, soft base color
+- **Cards & Surfaces**: Light cream tones for subtle elevation
 - **Subdued palette**: No bright gradients or flashy effects - emphasizes clarity and ease of use
 
 **State Management**: React hooks for local component state, TanStack Query (React Query) for server state management and API caching. User session data and scan history are persisted in localStorage.
