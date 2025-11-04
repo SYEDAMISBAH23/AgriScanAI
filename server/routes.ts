@@ -21,10 +21,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // History - GET
+  // History - GET (user-specific)
   app.get("/api/history", async (req, res) => {
     try {
-      const history = await storage.getHistory();
+      const userId = req.query.userId as string;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User ID required" });
+      }
+
+      const history = await storage.getHistory(userId);
       const formattedHistory = history.map(scan => ({
         id: scan.id,
         produce_label: scan.produceLabel,
@@ -48,9 +54,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/history", async (req, res) => {
     try {
       const scanData = req.body;
-      await storage.saveHistory(scanData);
+      
+      if (!scanData.userId) {
+        return res.status(401).json({ error: "User ID required" });
+      }
+
+      const insertScan = {
+        userId: scanData.userId,
+        produceLabel: scanData.produce_label || scanData.produceLabel,
+        produceConfidence: String(scanData.produce_confidence || scanData.produceConfidence),
+        organicLabel: scanData.organic_label || scanData.organicLabel || null,
+        organicConfidence: scanData.organic_confidence || scanData.organicConfidence ? String(scanData.organic_confidence || scanData.organicConfidence) : null,
+        detectedPlu: scanData.detected_plu || scanData.detectedPlu || null,
+        pluConfidence: scanData.plu_confidence || scanData.pluConfidence ? String(scanData.plu_confidence || scanData.pluConfidence) : null,
+        pluMeaning: scanData.plu_meaning || scanData.pluMeaning || null,
+        nutritionFacts: scanData.nutritional_info || scanData.nutritionFacts || null,
+        cleaningTips: scanData.cleaning_recommendations || scanData.cleaningTips || null,
+        imageUrl: scanData.imageUrl || null,
+      };
+
+      await storage.saveHistory(insertScan);
       res.json({ success: true, message: "Scan saved" });
     } catch (error) {
+      console.error("Save history error:", error);
       res.status(500).json({ error: "Failed to save history" });
     }
   });
