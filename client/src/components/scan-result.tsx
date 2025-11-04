@@ -162,7 +162,7 @@ export function ScanResult({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                className="h-3 w-3 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"
+                className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"
               />
               <p className="text-white/95 text-lg font-semibold">
                 {(produceConfidence * 100).toFixed(0)}% Match
@@ -181,14 +181,14 @@ export function ScanResult({
           <motion.div
             animate={{
               boxShadow: isOrganic 
-                ? "0 0 60px rgba(34, 197, 94, 0.3)" 
+                ? "0 0 60px hsl(var(--primary) / 0.3)" 
                 : "0 0 60px rgba(239, 68, 68, 0.3)"
             }}
             className={cn(
               "rounded-3xl p-8 backdrop-blur-xl border-2 transition-all duration-500",
               isOrganic 
-                ? "bg-emerald-500/10 border-emerald-500/30" 
-                : "bg-red-500/10 border-red-500/30"
+                ? "bg-primary/10 border-primary/30" 
+                : "bg-destructive/10 border-destructive/30"
             )}
           >
             <div className="flex items-center gap-6">
@@ -198,7 +198,7 @@ export function ScanResult({
                 transition={{ delay: 0.4, type: "spring", stiffness: 150 }}
                 className={cn(
                   "h-24 w-24 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden",
-                  isOrganic ? "bg-emerald-500" : "bg-red-500"
+                  isOrganic ? "bg-primary" : "bg-destructive"
                 )}
               >
                 <motion.div
@@ -220,7 +220,7 @@ export function ScanResult({
                   transition={{ delay: 0.5 }}
                   className={cn(
                     "text-5xl font-black mb-2",
-                    isOrganic ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                    isOrganic ? "text-primary" : "text-destructive"
                   )}
                   data-testid={`badge-organic-${isOrganic ? "yes" : "no"}`}
                 >
@@ -242,7 +242,7 @@ export function ScanResult({
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.7, type: "spring" }}
                 >
-                  <Sparkles className="h-10 w-10 text-emerald-500 animate-pulse" />
+                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
                 </motion.div>
               )}
             </div>
@@ -254,15 +254,15 @@ export function ScanResult({
               className={cn(
                 "mt-6 p-5 rounded-2xl backdrop-blur-sm border",
                 isOrganic 
-                  ? "bg-emerald-500/5 border-emerald-500/20" 
-                  : "bg-red-500/5 border-red-500/20"
+                  ? "bg-primary/5 border-primary/20" 
+                  : "bg-destructive/5 border-destructive/20"
               )}
             >
               <p className="text-base leading-relaxed">
                 {isOrganic ? (
-                  <>This produce is <span className="font-bold text-emerald-600 dark:text-emerald-400">certified organic</span>, grown without synthetic pesticides, fertilizers, or GMOs. A healthier choice for you and the environment! 🌱</>
+                  <>This produce is <span className="font-bold text-primary">certified organic</span>, grown without synthetic pesticides, fertilizers, or GMOs. A healthier choice for you and the environment! 🌱</>
                 ) : (
-                  <>This produce is <span className="font-bold text-red-600 dark:text-red-400">conventionally grown</span> and may contain pesticide residues. Wash thoroughly before consumption.</>
+                  <>This produce is <span className="font-bold text-destructive">conventionally grown</span> and may contain pesticide residues. Wash thoroughly before consumption.</>
                 )}
               </p>
             </motion.div>
@@ -483,7 +483,7 @@ export function ScanResult({
 
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Button
-              className="w-full h-16 text-base font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/30 rounded-2xl"
+              className="w-full h-16 text-base font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-lg shadow-primary/30 rounded-2xl"
               onClick={onSave}
               data-testid="button-save"
             >
