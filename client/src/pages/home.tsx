@@ -4,6 +4,11 @@ import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkl
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AgriScanAPI } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CameraCapture } from "@/components/camera-capture";
@@ -170,61 +175,103 @@ export default function Home() {
           <div className="flex items-center gap-1">
             {isAuthenticated && (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setLocation("/history")}
-                  data-testid="button-history"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setLocation("/fraud-reports")}
-                  data-testid="button-fraud-reports"
-                >
-                  <Flag className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setLocation("/history")}
+                      data-testid="button-history"
+                    >
+                      <History className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>History</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setLocation("/fraud-reports")}
+                      data-testid="button-fraud-reports"
+                    >
+                      <Flag className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Fraud Reports</p>
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation("/about")}
-              data-testid="button-about"
-            >
-              <Info className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/about")}
+                  data-testid="button-about"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>About</p>
+              </TooltipContent>
+            </Tooltip>
             
             <div className="flex items-center gap-1 ml-2">
               {isAuthenticated ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    data-testid="icon-logged-in"
-                  >
-                    <UserCheck className="h-4 w-4 text-primary" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleLogout}
-                    data-testid="button-logout"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        data-testid="icon-logged-in"
+                      >
+                        <UserCheck className="h-4 w-4 text-primary" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Logged In</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleLogout}
+                        data-testid="button-logout"
+                      >
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Logout</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </>
               ) : (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    data-testid="icon-guest"
-                  >
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        data-testid="icon-guest"
+                      >
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Guest</p>
+                    </TooltipContent>
+                  </Tooltip>
                   <Button
                     variant="default"
                     size="sm"
