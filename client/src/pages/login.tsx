@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { motion } from "framer-motion";
+import logoImage from "@assets/image_1762241916124.png";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -58,8 +59,8 @@ export default function LoginPage() {
             className="mb-8"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <ShieldCheck className="h-7 w-7 text-primary-foreground" />
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center overflow-hidden">
+                <img src={logoImage} alt="AgriScan AI" className="h-9 w-9 object-contain" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">AgriScan AI</h1>

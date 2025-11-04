@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Sparkles, ShieldCheck } from "lucide-react";
+import logoImage from "@assets/image_1762241916124.png";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => void;
@@ -29,8 +30,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
-              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-                <ShieldCheck className="h-10 w-10 text-white" />
+              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg overflow-hidden">
+                <img src={logoImage} alt="AgriScan AI" className="h-12 w-12 object-contain" />
               </div>
             </div>
           </div>

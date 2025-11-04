@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { CameraCapture } from "@/components/camera-capture";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import logoImage from "@assets/image_1762241916124.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -143,8 +144,8 @@ export default function Home() {
             className="flex items-center gap-3"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden">
+              <img src={logoImage} alt="AgriScan AI" className="h-8 w-8 object-contain" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AgriScan AI</h1>
