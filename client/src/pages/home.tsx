@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, User, UserCheck } from "lucide-react";
+import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, User, UserCheck, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
@@ -173,6 +173,21 @@ export default function Home() {
           </motion.div>
 
           <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/")}
+                  data-testid="button-home"
+                >
+                  <Home className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Home</p>
+              </TooltipContent>
+            </Tooltip>
             {isAuthenticated && (
               <>
                 <Tooltip>
