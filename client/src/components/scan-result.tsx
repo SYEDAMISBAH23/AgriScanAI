@@ -231,58 +231,59 @@ export function ScanResult({
                   transition={{ delay: 0.1 }}
                   data-testid="card-verification-analysis"
                 >
-                  <Card className="overflow-hidden border-2 border-blue-500/20 bg-blue-500/5">
+                  <Card className="overflow-hidden">
                     <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="rounded-full bg-blue-500/10 p-3">
-                          <ShieldCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="rounded-lg bg-primary/10 p-2.5">
+                          <ShieldCheck className="h-5 w-5 text-primary" />
                         </div>
-                        <div className="flex-1 space-y-3">
-                          <div>
-                            <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-1">
-                              Verification Analysis {manualVerdict && <span className="text-sm font-normal">(Manual PLU)</span>}
-                            </h3>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950/50 border-blue-300 dark:border-blue-700">
-                                {activeVerdict.match === 'perfect_match' ? 'Perfect Match' : 
-                                 activeVerdict.match === 'disagreement_plu_trusted' ? 'PLU Code Trusted' :
-                                 activeVerdict.match === 'disagreement_model_trusted' ? 'AI Model Trusted' :
-                                 'No PLU Code'}
-                              </Badge>
-                              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950/50 border-blue-300 dark:border-blue-700">
-                                {activeVerdict.reliability === 'very_high' ? 'Very High Confidence' :
-                                 activeVerdict.reliability === 'high' ? 'High Confidence' :
-                                 activeVerdict.reliability === 'moderate' ? 'Moderate Confidence' :
-                                 'Low Confidence'}
-                              </Badge>
-                            </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold mb-2">
+                            Verification Analysis
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {activeVerdict.match === 'perfect_match' ? 'Perfect Match' : 
+                               activeVerdict.match === 'disagreement_plu_trusted' ? 'PLU Code Trusted' :
+                               activeVerdict.match === 'disagreement_model_trusted' ? 'AI Model Trusted' :
+                               'No PLU Code'}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {activeVerdict.reliability === 'very_high' ? 'Very High Confidence' :
+                               activeVerdict.reliability === 'high' ? 'High Confidence' :
+                               activeVerdict.reliability === 'moderate' ? 'Moderate Confidence' :
+                               'Low Confidence'}
+                            </Badge>
                           </div>
-
-                          {activeVerdict.reasoning && (
-                            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                              <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
-                                <Info className="h-4 w-4 inline mr-2 text-blue-600 dark:text-blue-400" />
-                                {activeVerdict.reasoning}
-                              </p>
-                            </div>
-                          )}
-
-                          {activeVerdict.recommendation && (
-                            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                                💡 <strong>Recommendation:</strong> {activeVerdict.recommendation}
-                              </p>
-                            </div>
-                          )}
                         </div>
                       </div>
+
+                      {activeVerdict.reasoning && (
+                        <div className="bg-muted/50 rounded-lg p-4 mb-3">
+                          <div className="flex gap-2">
+                            <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {activeVerdict.reasoning}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeVerdict.recommendation && (
+                        <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                          <p className="text-sm leading-relaxed">
+                            <span className="font-semibold">💡 Recommendation:</span>{' '}
+                            <span className="text-muted-foreground">{activeVerdict.recommendation}</span>
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
               )}
 
               <Card>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-6 space-y-6">
                   <ConfidenceMeter label="Produce Identification" confidence={produceConfidence} />
                   <ConfidenceMeter label="Organic Detection" confidence={organicConfidence} />
                   {pluConfidence && (
