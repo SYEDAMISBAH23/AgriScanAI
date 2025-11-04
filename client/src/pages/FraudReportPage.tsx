@@ -1,275 +1,148 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Flag, MapPin, Mail, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, TrendingUp, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
+import type { FraudReport } from "@shared/schema";
 
-interface FraudReport {
-  id: number;
-  date: string;
-  produce: string;
-  plu: string;
-  severity: string;
-  status: string;
-  location: string;
-  vendor: string;
-  description: string;
-}
+export default function FraudReports() {
+  const [, setLocation] = useLocation();
 
-export default function FraudReportPage() {
-  const { toast } = useToast();
-  const [reports, setReports] = useState<FraudReport[]>([]);
-  const [formData, setFormData] = useState({
-    produce: "",
-    plu: "",
-    location: "",
-    vendor: "",
-    description: "",
-    severity: "medium",
+  const { data, isLoading } = useQuery<{ reports: FraudReport[] }>({
+    queryKey: ["/api/fraud-reports"],
   });
 
-  useEffect(() => {
-    const stored = localStorage.getItem("fraud_reports");
-    setReports(stored ? JSON.parse(stored) : []);
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const newReport: FraudReport = {
-      id: Date.now(),
-      date: new Date().toLocaleString(),
-      produce: formData.produce,
-      plu: formData.plu,
-      severity: formData.severity,
-      status: "pending",
-      location: formData.location,
-      vendor: formData.vendor,
-      description: formData.description,
-    };
-
-    const updated = [newReport, ...reports];
-    localStorage.setItem("fraud_reports", JSON.stringify(updated));
-    setReports(updated);
-
-    setFormData({
-      produce: "",
-      plu: "",
-      location: "",
-      vendor: "",
-      description: "",
-      severity: "medium",
-    });
-
-    toast({
-      title: "Report Submitted",
-      description: "Your fraud report has been recorded successfully.",
-    });
-  };
-
-  const stats = {
-    total: reports.length,
-    pending: reports.filter((r) => r.status === "pending").length,
-    verified: reports.filter((r) => r.status === "verified").length,
-  };
+  const reports = data?.reports || [];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-        <h1 className="text-4xl font-bold">Report Fraud</h1>
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b">
+        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLocation("/")}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-lg font-semibold">Fraud Reports</h1>
+          <ThemeToggle />
+        </div>
+      </header>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pending}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Verified</CardTitle>
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.verified}</div>
-            </CardContent>
-          </Card>
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <Flag className="h-6 w-6 text-destructive" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">Community Fraud Reports</h2>
+              <p className="text-muted-foreground">
+                Help us keep produce labeling honest
+              </p>
+            </div>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Submit Fraud Report</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="produce">Produce Name *</Label>
-                  <Input
-                    id="produce"
-                    placeholder="e.g., Banana"
-                    value={formData.produce}
-                    onChange={(e) =>
-                      setFormData({ ...formData, produce: e.target.value })
-                    }
-                    required
-                    data-testid="input-produce"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="plu">PLU Code</Label>
-                  <Input
-                    id="plu"
-                    placeholder="e.g., 4011"
-                    value={formData.plu}
-                    onChange={(e) =>
-                      setFormData({ ...formData, plu: e.target.value })
-                    }
-                    data-testid="input-plu"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location *</Label>
-                  <Input
-                    id="location"
-                    placeholder="Store name or location"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
-                    required
-                    data-testid="input-location"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vendor">Vendor Name</Label>
-                  <Input
-                    id="vendor"
-                    placeholder="Vendor or brand"
-                    value={formData.vendor}
-                    onChange={(e) =>
-                      setFormData({ ...formData, vendor: e.target.value })
-                    }
-                    data-testid="input-vendor"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="severity">Severity Level *</Label>
-                <Select
-                  value={formData.severity}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, severity: value })
-                  }
-                >
-                  <SelectTrigger data-testid="select-severity">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the suspected fraud in detail..."
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={4}
-                  required
-                  data-testid="input-description"
-                />
-              </div>
-
-              <Button type="submit" className="w-full" data-testid="button-submit">
-                Submit Report
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {reports.length > 0 && (
+        {reports.length === 0 ? (
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {reports.map((report) => (
-                  <div
-                    key={report.id}
-                    className="flex items-start justify-between p-4 border rounded-lg"
-                    data-testid={`report-${report.id}`}
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{report.produce}</span>
-                        {report.plu && (
-                          <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
-                            {report.plu}
-                          </code>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {report.location} • {report.date}
-                      </p>
-                      <p className="text-sm">{report.description}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge
-                        className={
-                          report.severity === "high"
-                            ? "bg-red-500 text-white"
-                            : report.severity === "medium"
-                            ? "bg-amber-500 text-white"
-                            : "bg-emerald-500 text-white"
-                        }
-                      >
-                        {report.severity}
-                      </Badge>
-                      <Badge variant="outline">{report.status}</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="p-12 text-center">
+              <Flag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">No reports yet</h3>
+              <p className="text-muted-foreground">
+                Fraud reports from the community will appear here
+              </p>
             </CardContent>
           </Card>
+        ) : (
+          <div className="space-y-4">
+            {reports.map((report) => (
+              <Card key={report.id} className="overflow-hidden" data-testid={`fraud-report-${report.id}`}>
+                <CardHeader className="bg-destructive/5 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl mb-2 flex items-center gap-2">
+                        <Flag className="h-5 w-5 text-destructive" />
+                        {report.produceLabel}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(report.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      report.organicLabel.toLowerCase() === "organic"
+                        ? "bg-accent/20 text-accent"
+                        : "bg-destructive/20 text-destructive"
+                    }`}>
+                      {report.organicLabel}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
+                          Vendor
+                        </p>
+                        <p className="font-semibold">{report.vendorName}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
+                          Location
+                        </p>
+                        <p className="font-semibold">{report.location}</p>
+                      </div>
+                    </div>
+
+                    {report.email && (
+                      <div className="flex items-start gap-3 md:col-span-2">
+                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                          <Mail className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-muted-foreground mb-1">
+                            Contact
+                          </p>
+                          <p className="font-semibold">{report.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

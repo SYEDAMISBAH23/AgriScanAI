@@ -70,7 +70,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 data-testid="input-password"
@@ -82,7 +82,7 @@ export default function LoginPage() {
               disabled={isLoading}
               data-testid="button-login"
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>

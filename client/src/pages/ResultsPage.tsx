@@ -1,70 +1,227 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { ScanResult } from "@/components/scan-result";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ScanLine } from "lucide-react";
-import ResultsCard from "@/components/ResultsCard";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useToast } from "@/hooks/use-toast";
+import { AgriScanAPI, type ScanResult as ScanResultType } from "@/lib/api";
 
-export default function ResultsPage() {
+export default function Results() {
   const [, setLocation] = useLocation();
-  const [results, setResults] = useState<any>(null);
+  const { toast } = useToast();
+  const [scanData, setScanData] = useState<ScanResultType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load scan data from sessionStorage (set from history page or home page)
   useEffect(() => {
-    const latestScan = localStorage.getItem("agriscan_latest_result");
-    if (latestScan) {
-      setResults(JSON.parse(latestScan));
+    const storedData = sessionStorage.getItem("currentScan");
+    if (storedData) {
+      try {
+        const data = JSON.parse(storedData);
+        setScanData(data);
+      } catch (error) {
+        console.error("Failed to parse scan data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load scan results",
+          variant: "destructive",
+        });
+        setLocation("/");
+      }
     } else {
-      setLocation("/home");
+      toast({
+        title: "No scan data",
+        description: "Please scan a produce first",
+        variant: "destructive",
+      });
+      setLocation("/");
     }
-  }, [setLocation]);
+    setIsLoading(false);
+  }, []);
 
-  if (!results) {
-    return null;
+  const handleSendMessage = async (message: string): Promise<string> => {
+    if (!scanData) return "No scan data available";
+
+    try {
+      const organicStatus = scanData.verdict 
+        ? scanData.verdict.verdict.toLowerCase() 
+        : (scanData.organic_label || scanData.model_organic_prediction || 'unknown');
+
+      const response = await AgriScanAPI.getChatAdvice(
+        scanData.produce_label,
+        organicStatus,
+        message
+      );
+      return response.response;
+    } catch (error: any) {
+      console.error("Chat error:", error);
+      return "Sorry, I couldn't process your question. Please try again.";
+    }
+  };
+
+  const handleScanAgain = () => {
+    sessionStorage.removeItem("currentScan");
+    setLocation("/");
+  };
+
+  const handleSave = async () => {
+    if (!scanData) return;
+
+    try {
+      await AgriScanAPI.saveToHistory(scanData);
+      toast({
+        title: "Scan saved",
+        description: "Added to your history",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to save",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSharePdf = () => {
+    if (!scanData) return;
+
+    const organicConf = scanData.verdict 
+      ? scanData.verdict.verdict_confidence 
+      : (scanData.organic_confidence || scanData.model_organic_confidence || 0);
+    const organicLbl = scanData.verdict 
+      ? scanData.verdict.verdict 
+      : (scanData.organic_label || scanData.model_organic_prediction || 'Unknown');
+
+    // Generate PDF content
+    const pdfContent = `
+AgriScan AI Report
+==================
+
+Produce: ${scanData.produce_label}
+Confidence: ${(scanData.produce_confidence * 100).toFixed(1)}%
+
+Organic Status: ${organicLbl}
+Confidence: ${(organicConf * 100).toFixed(1)}%
+
+PLU Code: ${scanData.detected_plu}
+Meaning: ${scanData.plu_meaning}
+
+Advice:
+${scanData.automatic_advice}
+
+Scanned: ${new Date(scanData.timestamp).toLocaleString()}
+    `.trim();
+
+    // Create a blob and download
+    const blob = new Blob([pdfContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `agriscan-${scanData.produce_label}-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Report downloaded",
+      description: "Check your downloads folder",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
+  if (!scanData) {
+    return null; // Will redirect in useEffect
+  }
+
+  // Format data for ScanResult component
+  // Show PLU even if not in database to help with debugging OCR
+  const hasValidPlu = scanData.detected_plu && scanData.detected_plu !== "None";
+
+  // Use verdict if available, otherwise fall back to legacy fields
+  const organicLabel = scanData.verdict ? scanData.verdict.verdict : (scanData.organic_label || scanData.model_organic_prediction);
+  const organicConfidence = scanData.verdict ? scanData.verdict.verdict_confidence : (scanData.organic_confidence || scanData.model_organic_confidence);
+
+  const formattedData = {
+    imageUrl: (scanData as any).imageUrl || "/placeholder-produce.jpg",
+    produceLabel: scanData.produce_label,
+    produceConfidence: scanData.produce_confidence,
+    organicLabel: organicLabel,
+    organicConfidence: organicConfidence,
+    detectedPlu: hasValidPlu ? scanData.detected_plu : undefined,
+    pluConfidence: scanData.plu_confidence,
+    pluMeaning: hasValidPlu ? (scanData.plu_meaning || "PLU code detected but not in database") : undefined,
+    nutritionFacts: extractNutritionFacts(scanData.automatic_advice),
+    cleaningTips: extractCleaningTips(scanData.automatic_advice),
+    verdict: scanData.verdict,
+  };
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold">Scan Results</h1>
-            <p className="text-muted-foreground">
-              Your produce verification analysis is complete
-            </p>
-          </div>
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b">
+        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <Button
-            onClick={() => setLocation("/home")}
-            variant="outline"
-            data-testid="button-new-scan"
-          >
-            <ScanLine className="h-4 w-4 mr-2" />
-            New Scan
-          </Button>
-        </div>
-
-        <ResultsCard
-          produceLabel={results.produce_label}
-          produceConfidence={results.produce_confidence}
-          verdict={results.verdict?.verdict || "UNKNOWN"}
-          verdictConfidence={results.verdict?.verdict_confidence || 0}
-          reliability={results.verdict?.reliability || "moderate"}
-          detectedPLU={results.detected_plu}
-          pluMeaning={results.plu_meaning}
-          reasoning={results.verdict?.reasoning || ""}
-          recommendation={results.verdict?.recommendation || ""}
-          nutrition={results.automatic_advice}
-        />
-
-        <div className="flex justify-center">
-          <Button
-            onClick={() => setLocation("/home")}
             variant="ghost"
-            data-testid="button-back-home"
+            size="icon"
+            onClick={() => setLocation("/")}
+            data-testid="button-back"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Scanner
+            <ArrowLeft className="h-5 w-5" />
           </Button>
+          <h1 className="text-lg font-semibold">Scan Results</h1>
+          <ThemeToggle />
         </div>
-      </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        <ScanResult
+          {...formattedData}
+          onScanAgain={handleScanAgain}
+          onSave={handleSave}
+          onSharePdf={handleSharePdf}
+          onSendMessage={handleSendMessage}
+        />
+      </main>
     </div>
   );
+}
+
+// Helper functions to parse automatic_advice
+function extractNutritionFacts(advice: string | undefined): string {
+  if (!advice) {
+    return "Rich in vitamins and minerals. Nutrition facts vary by produce type.";
+  }
+
+  const nutritionMatch = advice.match(/\*\*Nutrition:\*\*\s*([^\n]*(?:\n(?!\*\*)[^\n]*)*)/);
+  if (nutritionMatch) {
+    return nutritionMatch[1].trim();
+  }
+  // Fallback: return first paragraph
+  const firstParagraph = advice.split('\n\n')[0];
+  return firstParagraph.replace(/\*\*/g, '');
+}
+
+function extractCleaningTips(advice: string | undefined): string {
+  if (!advice) {
+    return "Rinse thoroughly under cool running water. Gently scrub with your hands or a soft brush.";
+  }
+
+  const cleaningMatch = advice.match(/\*\*Cleaning Tips?:\*\*\s*([^\n]*(?:\n(?!\*\*)[^\n]*)*)/);
+  if (cleaningMatch) {
+    return cleaningMatch[1].trim();
+  }
+  // Fallback: return second paragraph if exists
+  const paragraphs = advice.split('\n\n');
+  if (paragraphs.length > 1) {
+    return paragraphs[1].replace(/\*\*/g, '');
+  }
+  return "Rinse thoroughly under running water.";
 }
