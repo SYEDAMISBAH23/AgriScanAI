@@ -8,12 +8,25 @@ The system addresses organic food fraud by combining computer vision with PLU co
 
 ## Recent Updates (November 2025)
 
-### Database Migration (Latest)
+### Enhanced Authentication System (Latest)
+- **Sign In/Sign Up Toggle**: Login page now has tabs to switch between Sign In and Sign Up modes
+- **Separate Signup Flow**: Dedicated /api/signup endpoint that checks for existing emails
+- **Specific Error Messages**: 
+  - "Email already in use" when trying to sign up with existing email
+  - "Incorrect password" when password is wrong during login
+  - "No account found with this email" when email doesn't exist
+- **Confirm Password Field**: Added in signup mode to prevent typos
+- **Forgot Password Feature**: 
+  - Two-step flow: email verification → password reset
+  - Dedicated /forgot-password page
+  - Backend endpoints for /api/verify-email and /api/reset-password
+  - Users can reset password if they forget it
+
+### Database Migration
 - **PostgreSQL Database Integration**: Migrated from localStorage to PostgreSQL for persistent, user-specific scan history
 - **User Authentication**: Implemented real user accounts with UUID primary keys stored in database
 - **Scan History Per User**: Each user now has their own isolated scan history that persists across devices and browsers
-- **Auto-Registration**: Users are automatically registered on first login with email and password
-- **Password Validation**: Existing users must provide correct password to access their account
+- **Password Management**: Users can sign up, login, and reset passwords with proper validation
 
 ### Earlier Updates
 - **Complete Color Palette Redesign**: Updated to sage green, green, and cream color scheme
