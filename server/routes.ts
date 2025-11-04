@@ -5,35 +5,60 @@ import { getChatCompletion } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // Login
+  // Sign Up
+  app.post("/api/signup", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(email);
+      
+      if (existingUser) {
+        return res.status(409).json({ error: "Email already in use" });
+      }
+
+      // Create new user
+      const user = await storage.createUser({
+        username: email,
+        password: password, // NOTE: In production, this should be hashed with bcrypt!
+      });
+      
+      res.json({ success: true, email, userId: user.id });
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      res.status(500).json({ error: "Signup failed" });
+    }
+  });
+
+  // Sign In
   app.post("/api/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       
       if (!email || !password) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(400).json({ error: "Email and password are required" });
       }
 
-      // Get or create user (using email as username)
-      let user = await storage.getUserByUsername(email);
+      // Get user
+      const user = await storage.getUserByUsername(email);
       
       if (!user) {
-        // Create new user if doesn't exist (auto-registration)
-        user = await storage.createUser({
-          username: email,
-          password: password, // NOTE: In production, this should be hashed with bcrypt!
-        });
-      } else {
-        // Verify password for existing user
-        if (user.password !== password) {
-          return res.status(401).json({ error: "Invalid credentials" });
-        }
+        return res.status(404).json({ error: "No account found with this email" });
+      }
+
+      // Verify password
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Incorrect password" });
       }
       
       res.json({ success: true, email, userId: user.id });
     } catch (error: any) {
       console.error("Login error:", error);
-      res.status(401).json({ error: "Login failed" });
+      res.status(500).json({ error: "Login failed" });
     }
   });
 
