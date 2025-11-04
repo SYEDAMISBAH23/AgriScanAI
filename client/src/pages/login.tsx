@@ -14,16 +14,30 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate password confirmation in signup mode
+    if (mode === "signup" && password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure both passwords are the same",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("/api/login", {
+      const endpoint = mode === "signup" ? "/api/signup" : "/api/login";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,16 +45,19 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Login failed");
+        throw new Error(data.error || (mode === "signup" ? "Signup failed" : "Login failed"));
       }
 
-      const data = await response.json();
       login(data.email, data.userId);
 
       toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
+        title: mode === "signup" ? "Account created!" : "Welcome back!",
+        description: mode === "signup" 
+          ? "You have successfully signed up." 
+          : "You have successfully logged in.",
       });
 
       // Check if there's a pending scan result
@@ -54,7 +71,7 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       toast({
-        title: "Login failed",
+        title: mode === "signup" ? "Signup failed" : "Login failed",
         description: error.message || "Invalid credentials",
         variant: "destructive",
       });
@@ -94,8 +111,14 @@ export default function LoginPage() {
                 <p className="text-sm text-muted-foreground">Scan. Identify. Eat Healthy.</p>
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h2>
-            <p className="text-muted-foreground">Sign in to verify your organic produce</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              {mode === "signin" ? "Welcome Back" : "Create Account"}
+            </h2>
+            <p className="text-muted-foreground">
+              {mode === "signin" 
+                ? "Sign in to verify your organic produce" 
+                : "Sign up to start verifying your organic produce"}
+            </p>
           </motion.div>
 
           <motion.div
@@ -105,9 +128,39 @@ export default function LoginPage() {
           >
             <Card>
               <CardHeader>
-                <CardTitle>Sign In</CardTitle>
+                <div className="flex justify-center mb-4">
+                  <div className="inline-flex rounded-lg bg-muted p-1">
+                    <button
+                      type="button"
+                      onClick={() => setMode("signin")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        mode === "signin"
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      data-testid="tab-signin"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("signup")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        mode === "signup"
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      data-testid="tab-signup"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                </div>
+                <CardTitle>{mode === "signin" ? "Sign In" : "Sign Up"}</CardTitle>
                 <CardDescription>
-                  Enter your credentials to access your account
+                  {mode === "signin"
+                    ? "Enter your credentials to access your account"
+                    : "Create a new account to get started"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -127,11 +180,23 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      {mode === "signin" && (
+                        <button
+                          type="button"
+                          onClick={() => setLocation("/forgot-password")}
+                          className="text-xs text-primary hover:underline"
+                          data-testid="link-forgot-password"
+                        >
+                          Forgot password?
+                        </button>
+                      )}
+                    </div>
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder={mode === "signup" ? "Create a password" : "Enter your password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -139,6 +204,22 @@ export default function LoginPage() {
                       className="h-11"
                     />
                   </div>
+
+                  {mode === "signup" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="Confirm your password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        data-testid="input-confirm-password"
+                        className="h-11"
+                      />
+                    </div>
+                  )}
 
                   <Button
                     type="submit"
@@ -153,11 +234,11 @@ export default function LoginPage() {
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"
                         />
-                        Signing in...
+                        {mode === "signup" ? "Creating account..." : "Signing in..."}
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
-                        Sign In
+                        {mode === "signup" ? "Create Account" : "Sign In"}
                         <ArrowRight className="h-4 w-4" />
                       </span>
                     )}
