@@ -1,24 +1,30 @@
-import { Switch, Route, Redirect, useLocation } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useEffect, useState } from "react";
-import NotFound from "@/pages/not-found";
-import LoginPage from "@/pages/LoginPage";
-import HomePage from "@/pages/HomePage";
-import ResultsPage from "@/pages/ResultsPage";
-import HistoryPage from "@/pages/HistoryPage";
-import FraudReportPage from "@/pages/FraudReportPage";
-import AboutPage from "@/pages/AboutPage";
-import Navbar from "@/components/Navbar";
-import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import Login from "@/pages/login";
+import Home from "@/pages/home";
+import Results from "@/pages/results";
+import History from "@/pages/history";
+import FraudReports from "@/pages/fraud-reports";
+import About from "@/pages/about";
+import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const userEmail = localStorage.getItem("agriscan_user");
-  
-  if (!userEmail) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Redirect to="/login" />;
   }
 
@@ -26,55 +32,20 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 function Router() {
-  const [, setLocation] = useLocation();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    const email = localStorage.getItem("agriscan_user");
-    setUserEmail(email);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("agriscan_user");
-    setUserEmail(null);
-    setLocation("/login");
-  };
-
-  const showNavbar = userEmail && window.location.pathname !== "/login";
-
   return (
-    <div className="min-h-screen">
-      {showNavbar && <Navbar userEmail={userEmail} onLogout={handleLogout} />}
-      <Switch>
-        <Route path="/login" component={LoginPage} />
-        <Route path="/home">
-          {() => <ProtectedRoute component={HomePage} />}
-        </Route>
-        <Route path="/results">
-          {() => <ProtectedRoute component={ResultsPage} />}
-        </Route>
-        <Route path="/history">
-          {() => <ProtectedRoute component={HistoryPage} />}
-        </Route>
-        <Route path="/report">
-          {() => <ProtectedRoute component={FraudReportPage} />}
-        </Route>
-        <Route path="/about">
-          {() => <ProtectedRoute component={AboutPage} />}
-        </Route>
-        <Route path="/">
-          {() => {
-            const email = localStorage.getItem("agriscan_user");
-            return email ? <Redirect to="/home" /> : <Redirect to="/login" />;
-          }}
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
-    </div>
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Route path="/about" component={About} />
+      <Route path="/" component={() => <ProtectedRoute component={Home} />} />
+      <Route path="/results" component={() => <ProtectedRoute component={Results} />} />
+      <Route path="/history" component={() => <ProtectedRoute component={History} />} />
+      <Route path="/fraud-reports" component={() => <ProtectedRoute component={FraudReports} />} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
-export default function App() {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -88,3 +59,5 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+export default App;
