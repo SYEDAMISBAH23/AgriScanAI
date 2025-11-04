@@ -120,15 +120,36 @@ export const AgriScanAPI = {
     return response.json();
   },
 
-  async getHistory(): Promise<any[]> {
-    const history = localStorage.getItem("scanHistory");
-    return history ? JSON.parse(history) : [];
+  async getHistory(userId: string): Promise<any[]> {
+    const response = await fetch(`/api/history?userId=${encodeURIComponent(userId)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch history");
+    }
+
+    const data = await response.json();
+    return data.history || [];
   },
 
-  async saveToHistory(scanData: ScanResult): Promise<void> {
-    const history = localStorage.getItem("scanHistory");
-    const historyArray = history ? JSON.parse(history) : [];
-    historyArray.unshift(scanData);
-    localStorage.setItem("scanHistory", JSON.stringify(historyArray));
+  async saveToHistory(scanData: ScanResult, userId: string): Promise<void> {
+    const response = await fetch("/api/history", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...scanData,
+        userId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save history");
+    }
   },
 };

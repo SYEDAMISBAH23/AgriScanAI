@@ -7,10 +7,12 @@ import { Navbar } from "@/components/navbar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgriScanAPI, type HistoryItem } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 
 export default function History() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [filter, setFilter] = useState<"all" | "organic" | "non-organic">("all");
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,12 +20,17 @@ export default function History() {
   // Load history on component mount
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [user]);
 
   const loadHistory = async () => {
+    if (!user?.email) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const data = await AgriScanAPI.getHistory();
+      const data = await AgriScanAPI.getHistory(user.email);
       setHistory(data);
     } catch (error: any) {
       console.error("Failed to load history:", error);

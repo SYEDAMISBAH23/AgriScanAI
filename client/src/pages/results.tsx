@@ -5,10 +5,12 @@ import { Loader2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { useToast } from "@/hooks/use-toast";
 import { AgriScanAPI, type ScanResult as ScanResultType } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 export default function Results() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [scanData, setScanData] = useState<ScanResultType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,10 +67,17 @@ export default function Results() {
   };
 
   const handleSave = async () => {
-    if (!scanData) return;
+    if (!scanData || !user?.email) {
+      toast({
+        title: "Cannot save",
+        description: "Please log in to save your scan history",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      await AgriScanAPI.saveToHistory(scanData);
+      await AgriScanAPI.saveToHistory(scanData, user.email);
       toast({
         title: "Scan saved",
         description: "Added to your history",
