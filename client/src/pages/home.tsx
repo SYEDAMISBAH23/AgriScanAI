@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { History, LogOut, Flag, Info, Sparkles, Camera, Upload, Zap } from "lucide-react";
+import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, Leaf, BookCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
@@ -8,12 +8,14 @@ import { AgriScanAPI } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CameraCapture } from "@/components/camera-capture";
 import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { logout } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -28,16 +30,14 @@ export default function Home() {
     setIsScanning(true);
 
     try {
-      // Convert base64 to File
       const blob = await (await fetch(imageData)).blob();
       const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
 
       const result = await AgriScanAPI.scanProduce(file);
 
-      // Store result with image in sessionStorage for results page
       const resultWithImage = {
         ...result,
-        imageUrl: imageData, // Store the base64 image
+        imageUrl: imageData,
       };
       sessionStorage.setItem("currentScan", JSON.stringify(resultWithImage));
 
@@ -46,7 +46,6 @@ export default function Home() {
         description: `Detected: ${result.produce_label}`,
       });
 
-      // Navigate to results
       setTimeout(() => {
         setLocation("/results");
       }, 500);
@@ -67,7 +66,6 @@ export default function Home() {
     setIsScanning(true);
 
     try {
-      // Convert file to base64 for display
       const reader = new FileReader();
       const imageDataPromise = new Promise<string>((resolve) => {
         reader.onload = (e) => resolve(e.target?.result as string);
@@ -79,10 +77,9 @@ export default function Home() {
         imageDataPromise,
       ]);
 
-      // Store result with image in sessionStorage for results page
       const resultWithImage = {
         ...result,
-        imageUrl: imageData, // Store the base64 image
+        imageUrl: imageData,
       };
       sessionStorage.setItem("currentScan", JSON.stringify(resultWithImage));
 
@@ -91,7 +88,6 @@ export default function Home() {
         description: `Detected: ${result.produce_label}`,
       });
 
-      // Navigate to results
       setTimeout(() => {
         setLocation("/results");
       }, 500);
@@ -108,254 +104,340 @@ export default function Home() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Animated Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-accent/8 pointer-events-none" />
-      <motion.div
-        animate={{
-          backgroundPosition: ["0% 0%", "100% 100%"],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
-        className="absolute inset-0 bg-gradient-to-tr from-accent/8 via-transparent to-primary/8 pointer-events-none"
-        style={{ backgroundSize: "200% 200%" }}
-      />
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5 }
+  };
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-black/5">
-        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+  const stagger = {
+    animate: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Top Navigation Bar */}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-50 bg-card border-b"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-3"
+            whileHover={{ scale: 1.02 }}
           >
-            <motion.div
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/30"
-            >
-              <Sparkles className="h-6 w-6 text-white" />
-            </motion.div>
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <Leaf className="h-6 w-6 text-primary-foreground" />
+            </div>
             <div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                AgriScan AI
-              </h1>
-              <p className="text-xs text-muted-foreground font-medium">Powered by Intelligence</p>
+              <h1 className="text-lg font-bold text-foreground">AgriScan</h1>
+              <p className="text-xs text-muted-foreground">Organic Verification</p>
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLocation("/about")}
-              className="h-11 w-11"
-              data-testid="button-about"
-            >
-              <Info className="h-5 w-5" />
-            </Button>
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation("/history")}
-              className="h-11 w-11"
               data-testid="button-history"
             >
-              <History className="h-5 w-5" />
+              <History className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation("/fraud-reports")}
-              className="h-11 w-11"
               data-testid="button-fraud-reports"
             >
-              <Flag className="h-5 w-5" />
+              <Flag className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLocation("/about")}
+              data-testid="button-about"
+            >
+              <Info className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="h-11 w-11"
               data-testid="button-logout"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
             </Button>
             <ThemeToggle />
-          </motion.div>
+          </div>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 relative z-10">
-        <div className="max-w-5xl mx-auto">
-          {/* Hero Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-12 pt-8"
-          >
+      {/* Main Content - Scrollable Sections */}
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="py-16 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/20 rounded-full mb-6"
+              initial="initial"
+              animate="animate"
+              variants={stagger}
+              className="text-center max-w-4xl mx-auto"
             >
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-bold text-primary">
-                AI-Powered Produce Analysis
-              </span>
+              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Certified Organic Verification</span>
+              </motion.div>
+
+              <motion.h2 variants={fadeInUp} className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-foreground">
+                Verify Organic Produce
+                <span className="text-primary"> Instantly</span>
+              </motion.h2>
+
+              <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground mb-8 leading-relaxed">
+                Stop guessing about organic certification. AgriScan uses AI-powered image recognition
+                and PLU code analysis to verify the authenticity of your organic produce in seconds.
+              </motion.p>
+
+              <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => setShowScanner(true)}
+                  className="h-12 px-8 text-base font-semibold"
+                  data-testid="button-start-scan"
+                >
+                  <Scan className="h-5 w-5 mr-2" />
+                  Start Scanning
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setLocation("/history")}
+                  className="h-12 px-8 text-base"
+                  data-testid="button-view-history"
+                >
+                  View History
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </motion.div>
+
+              {/* Trust Indicators */}
+              <motion.div variants={fadeInUp} className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <span>Instant Analysis</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <span>PLU Verified</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <span>AI-Powered</span>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Scanner Section - Shown when user clicks start */}
+        {showScanner && (
+          <motion.section
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="py-8 px-4 sm:px-6 border-t bg-muted/30"
+          >
+            <div className="max-w-5xl mx-auto">
+              {isScanning ? (
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"
+                    />
+                    <p className="text-xl font-semibold mb-2">Analyzing produce...</p>
+                    <p className="text-sm text-muted-foreground">Our AI is verifying authenticity</p>
+                  </motion.div>
+                </div>
+              ) : (
+                <CameraCapture 
+                  onCapture={handleCapture} 
+                  onUpload={handleUpload}
+                />
+              )}
+            </div>
+          </motion.section>
+        )}
+
+        {/* How It Works Section */}
+        <section className="py-20 px-4 sm:px-6 bg-muted/50">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-16"
+            >
+              <motion.h3 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">
+                How AgriScan Works
+              </motion.h3>
+              <motion.p variants={fadeInUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Our advanced verification process ensures accurate organic certification
+              </motion.p>
             </motion.div>
 
-            <h2 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
-                Scan Your Produce
-              </span>
-            </h2>
-
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium">
-              Instantly identify produce, verify organic certification, and get AI-powered health insights
-            </p>
-
-            {/* Feature Pills */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex flex-wrap items-center justify-center gap-3 mt-8"
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="grid md:grid-cols-4 gap-8"
             >
               {[
-                { icon: Camera, text: "Live Camera" },
-                { icon: Upload, text: "Upload Image" },
-                { icon: Sparkles, text: "AI Analysis" },
-              ].map((feature, i) => (
+                {
+                  step: "01",
+                  icon: Camera,
+                  title: "Capture Image",
+                  description: "Take a photo of your produce or upload an existing image from your device"
+                },
+                {
+                  step: "02",
+                  icon: Sparkles,
+                  title: "AI Analysis",
+                  description: "Our machine learning model identifies the produce type and detects PLU codes"
+                },
+                {
+                  step: "03",
+                  icon: BookCheck,
+                  title: "Verification",
+                  description: "Cross-reference PLU codes and visual markers against organic certification databases"
+                },
+                {
+                  step: "04",
+                  icon: CheckCircle2,
+                  title: "Results & Advice",
+                  description: "Get instant verification results, nutritional info, and personalized handling tips"
+                }
+              ].map((item, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-card border rounded-full shadow-sm"
+                  variants={fadeInUp}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <feature.icon className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">{feature.text}</span>
+                  <Card className="p-6 h-full relative overflow-hidden">
+                    <div className="absolute top-0 right-0 text-6xl font-bold text-muted opacity-5">
+                      {item.step}
+                    </div>
+                    <div className="relative">
+                      <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                        <item.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <h4 className="text-lg font-bold mb-2">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </Card>
                 </motion.div>
               ))}
             </motion.div>
-          </motion.div>
+          </div>
+        </section>
 
-          {/* Scanner Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-          >
-            {isScanning ? (
-              <div className="flex items-center justify-center min-h-[500px]">
+        {/* Features & Benefits Section */}
+        <section className="py-20 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="grid md:grid-cols-3 gap-8"
+            >
+              {[
+                {
+                  icon: Shield,
+                  title: "Fraud Protection",
+                  description: "Combat organic food fraud by verifying authenticity before purchase",
+                  stat: "99.2% Accuracy"
+                },
+                {
+                  icon: Sparkles,
+                  title: "AI-Powered Insights",
+                  description: "Get detailed nutritional information and personalized health recommendations",
+                  stat: "Real-time Analysis"
+                },
+                {
+                  icon: Upload,
+                  title: "Easy Integration",
+                  description: "Works with camera or uploaded images. No special equipment needed",
+                  stat: "One-Click Scan"
+                }
+              ].map((feature, i) => (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center"
+                  key={i}
+                  variants={fadeInUp}
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="h-20 w-20 border-4 border-primary border-t-transparent rounded-full mx-auto mb-6"
-                  />
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-2xl font-bold mb-2"
-                  >
-                    Analyzing produce...
-                  </motion.p>
-                  <p className="text-base text-muted-foreground">
-                    Our AI is identifying your produce
-                  </p>
-
-                  {/* Pulsing Effects */}
-                  <div className="mt-8 flex items-center justify-center gap-2">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [0.3, 1, 0.3],
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          delay: i * 0.2,
-                        }}
-                        className="h-3 w-3 rounded-full bg-primary"
-                      />
-                    ))}
-                  </div>
+                  <Card className="p-8 h-full">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center">
+                        <feature.icon className="h-7 w-7 text-primary-foreground" />
+                      </div>
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                        {feature.stat}
+                      </span>
+                    </div>
+                    <h4 className="text-xl font-bold mb-3">{feature.title}</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </Card>
                 </motion.div>
-              </div>
-            ) : (
-              <CameraCapture 
-                onCapture={handleCapture} 
-                onUpload={handleUpload}
-              />
-            )}
-          </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
 
-          {/* Info Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.7 }}
-            className="mt-16 grid md:grid-cols-3 gap-6"
-          >
-            {[
-              {
-                icon: Sparkles,
-                title: "AI-Powered",
-                description: "Advanced machine learning models trained on thousands of produce images",
-                color: "from-accent to-accent/80",
-              },
-              {
-                icon: Zap,
-                title: "Instant Results",
-                description: "Get detailed analysis, nutrition facts, and safety tips in seconds",
-                color: "from-primary to-primary/80",
-              },
-              {
-                icon: Camera,
-                title: "Easy to Use",
-                description: "Simply snap a photo or upload an image to get started",
-                color: "from-primary/80 to-primary",
-              },
-            ].map((card, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -5 }}
-                className="relative group"
+        {/* CTA Section */}
+        <section className="py-16 px-4 sm:px-6 bg-primary/5 border-y">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h3 className="text-3xl font-bold mb-4">Ready to Verify Your Produce?</h3>
+              <p className="text-lg text-muted-foreground mb-8">
+                Join thousands of consumers making informed choices about organic food
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setShowScanner(true)}
+                className="h-12 px-10 text-base font-semibold"
+                data-testid="button-cta-scan"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative p-8 bg-card border-2 border-border/50 rounded-3xl backdrop-blur-sm hover:border-primary/30 transition-colors duration-300">
-                  <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-5 shadow-lg shadow-black/10`}>
-                    <card.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">{card.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+                <Scan className="h-5 w-5 mr-2" />
+                Scan Now - It's Free
+              </Button>
+            </motion.div>
+          </div>
+        </section>
       </main>
     </div>
   );
