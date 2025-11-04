@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck } from "lucide-react";
+import { Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, Flag, Users, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AgriScanAPI } from "@/lib/api";
@@ -369,6 +369,116 @@ export default function Home() {
                   </Card>
                 </motion.div>
               ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Community Fraud Reporting Section */}
+        <section className="py-20 px-4 sm:px-6 bg-destructive/5">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-12"
+            >
+              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-destructive/10 border border-destructive/20 text-destructive px-4 py-2 rounded-full mb-6">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-bold">Community Protection</span>
+              </motion.div>
+              <motion.h3 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold mb-4">
+                Report Suspicious Produce
+              </motion.h3>
+              <motion.p variants={fadeInUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Help protect the community by reporting fraudulent organic labeling
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="grid md:grid-cols-3 gap-6 mb-10"
+            >
+              {[
+                {
+                  icon: Flag,
+                  title: "Report Fraud",
+                  description: "Found mislabeled produce? Report it after scanning to help others avoid fraud"
+                },
+                {
+                  icon: Users,
+                  title: "Community Database",
+                  description: "Search reported vendors by name and view fraud reports sorted by date"
+                },
+                {
+                  icon: Shield,
+                  title: "Stay Protected",
+                  description: "Check community reports before purchasing to make informed decisions"
+                }
+              ].map((item, i) => (
+                <motion.div key={i} variants={fadeInUp}>
+                  <Card className="p-6 h-full text-center">
+                    <div className="h-12 w-12 rounded-lg bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                      <item.icon className="h-6 w-6 text-destructive" />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">{item.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              {isAuthenticated ? (
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Button
+                    size="lg"
+                    variant="default"
+                    onClick={() => setLocation("/fraud-reports")}
+                    className="h-12 px-8 text-base gap-2"
+                    data-testid="button-view-fraud-reports"
+                  >
+                    <Flag className="h-5 w-5" />
+                    View Community Reports
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={scrollToScanner}
+                    className="h-12 px-8 text-base gap-2"
+                    data-testid="button-scan-to-report"
+                  >
+                    <Scan className="h-5 w-5" />
+                    Scan & Report
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Sign in to report fraud and view community reports
+                  </p>
+                  <Button
+                    size="lg"
+                    variant="default"
+                    onClick={() => setLocation("/login")}
+                    className="h-12 px-8 text-base"
+                    data-testid="button-signin-fraud"
+                  >
+                    Sign In to Report
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
