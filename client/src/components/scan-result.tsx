@@ -131,172 +131,84 @@ export function ScanResult({
       />
 
       <div className="space-y-8 pb-8">
-        {/* Hero Image with Overlay */}
+        {/* Hero Image Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative h-80 overflow-hidden rounded-3xl shadow-2xl"
+          transition={{ duration: 0.5 }}
+          className="grid md:grid-cols-2 gap-6"
         >
-          <motion.img
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            src={imageUrl}
-            alt={produceLabel}
-            className="w-full h-full object-cover"
-            data-testid="img-scan-result"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="absolute bottom-0 left-0 right-0 p-8"
-          >
-            <h2 className="text-6xl md:text-7xl font-black capitalize text-white mb-4 drop-shadow-2xl" data-testid="text-produce-name">
-              {produceLabel}
-            </h2>
-            <div className="flex items-center gap-3">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"
-              />
-              <p className="text-white/95 text-lg font-semibold">
-                {(produceConfidence * 100).toFixed(0)}% Match
-              </p>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Organic Status Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="relative"
-        >
-          <motion.div
-            animate={{
-              boxShadow: isOrganic 
-                ? "0 0 60px hsl(var(--primary) / 0.3)" 
-                : "0 0 60px rgba(239, 68, 68, 0.3)"
-            }}
-            className={cn(
-              "rounded-3xl p-8 backdrop-blur-xl border-2 transition-all duration-500",
-              isOrganic 
-                ? "bg-primary/10 border-primary/30" 
-                : "bg-destructive/10 border-destructive/30"
-            )}
-          >
-            <div className="flex items-center gap-6">
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.4, type: "spring", stiffness: 150 }}
-                className={cn(
-                  "h-24 w-24 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden",
-                  isOrganic ? "bg-primary" : "bg-destructive"
-                )}
-              >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
-                />
-                {isOrganic ? (
-                  <Leaf className="h-12 w-12 text-white relative z-10" />
-                ) : (
-                  <AlertCircle className="h-12 w-12 text-white relative z-10" />
-                )}
-              </motion.div>
-
-              <div className="flex-1">
-                <motion.h3
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className={cn(
-                    "text-5xl font-black mb-2",
-                    isOrganic ? "text-primary" : "text-destructive"
-                  )}
-                  data-testid={`badge-organic-${isOrganic ? "yes" : "no"}`}
-                >
-                  {isOrganic ? "Certified Organic" : "Non-Organic"}
-                </motion.h3>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-lg text-muted-foreground font-medium"
-                >
-                  {(organicConfidence * 100).toFixed(0)}% confidence
-                </motion.p>
+          <div className="relative h-64 md:h-80 overflow-hidden rounded-xl border">
+            <img
+              src={imageUrl}
+              alt={produceLabel}
+              className="w-full h-full object-cover"
+              data-testid="img-scan-result"
+            />
+          </div>
+          <div className="flex flex-col justify-center space-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-2">Detected Produce</div>
+              <h2 className="text-4xl font-bold capitalize mb-2" data-testid="text-produce-name">
+                {produceLabel}
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <span>{(produceConfidence * 100).toFixed(0)}% Confidence</span>
               </div>
-
-              {isOrganic && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.7, type: "spring" }}
-                >
-                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
-                </motion.div>
-              )}
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className={cn(
-                "mt-6 p-5 rounded-2xl backdrop-blur-sm border",
-                isOrganic 
-                  ? "bg-primary/5 border-primary/20" 
-                  : "bg-destructive/5 border-destructive/20"
-              )}
-            >
-              <p className="text-base leading-relaxed">
+            <div className={cn(
+              "p-4 rounded-lg border-2",
+              isOrganic ? "bg-primary/5 border-primary" : "bg-muted border-border"
+            )}>
+              <div className="flex items-center gap-3 mb-2">
                 {isOrganic ? (
-                  <>This produce is <span className="font-bold text-primary">certified organic</span>, grown without synthetic pesticides, fertilizers, or GMOs. A healthier choice for you and the environment! 🌱</>
+                  <Leaf className="h-6 w-6 text-primary" />
                 ) : (
-                  <>This produce is <span className="font-bold text-destructive">conventionally grown</span> and may contain pesticide residues. Wash thoroughly before consumption.</>
+                  <AlertCircle className="h-6 w-6 text-muted-foreground" />
                 )}
-              </p>
-            </motion.div>
-          </motion.div>
+                <div>
+                  <div className="font-bold text-lg" data-testid={`badge-organic-${isOrganic ? "yes" : "no"}`}>
+                    {isOrganic ? "Certified Organic" : "Non-Organic"}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {(organicConfidence * 100).toFixed(0)}% Confidence
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Toggle Tabs */}
+
+        {/* Tabs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex gap-3 p-1.5 bg-muted/50 backdrop-blur-sm rounded-2xl border"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-2 p-1 bg-muted rounded-lg border"
         >
           <button
             onClick={() => setActiveTab("details")}
             className={cn(
-              "flex-1 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-300",
+              "flex-1 py-3 px-4 rounded-md font-medium text-sm transition-colors",
               activeTab === "details"
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover-elevate"
             )}
           >
-            Detection Details
+            Details
           </button>
           <button
             onClick={() => setActiveTab("nutrition")}
             className={cn(
-              "flex-1 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-300",
+              "flex-1 py-3 px-4 rounded-md font-medium text-sm transition-colors",
               activeTab === "nutrition"
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover-elevate"
             )}
           >
-            Nutrition Info
+            Nutrition
           </button>
         </motion.div>
 
@@ -369,8 +281,8 @@ export function ScanResult({
                 </motion.div>
               )}
 
-              <Card className="backdrop-blur-xl bg-card/80 shadow-xl border-2 rounded-3xl overflow-hidden">
-                <CardContent className="p-8 space-y-6">
+              <Card>
+                <CardContent className="p-6 space-y-4">
                   <ConfidenceMeter label="Produce Identification" confidence={produceConfidence} />
                   <ConfidenceMeter label="Organic Detection" confidence={organicConfidence} />
                   {pluConfidence && (
@@ -387,27 +299,27 @@ export function ScanResult({
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="backdrop-blur-xl bg-card/80 shadow-xl border-2 rounded-3xl overflow-hidden">
-                <CardContent className="p-8">
+              <Card>
+                <CardContent className="p-6">
                   <div className="space-y-6">
                     {nutritionFacts && (
                       <div>
-                        <h4 className="text-xl font-bold mb-3 flex items-center gap-2">
-                          <Sparkles className="h-5 w-5 text-primary" />
+                        <h4 className="text-base font-bold mb-2 flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
                           Nutrition Facts
                         </h4>
-                        <p className="text-base leading-relaxed text-muted-foreground">
+                        <p className="text-sm leading-relaxed text-muted-foreground">
                           {nutritionFacts}
                         </p>
                       </div>
                     )}
                     {cleaningTips && (
                       <div>
-                        <h4 className="text-xl font-bold mb-3 flex items-center gap-2">
-                          <Sparkles className="h-5 w-5 text-primary" />
+                        <h4 className="text-base font-bold mb-2 flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
                           Cleaning Tips
                         </h4>
-                        <p className="text-base leading-relaxed text-muted-foreground">
+                        <p className="text-sm leading-relaxed text-muted-foreground">
                           {cleaningTips}
                         </p>
                       </div>
@@ -449,59 +361,42 @@ export function ScanResult({
 
         {/* Action Buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="grid grid-cols-2 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-wrap gap-3"
         >
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              className="w-full h-16 text-base font-bold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-500/30 rounded-2xl"
-              onClick={handleReportFraud}
-              data-testid="button-report-fraud"
-            >
-              <Flag className="h-5 w-5 mr-2" />
-              Report Fraud
-            </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              className={cn(
-                "w-full h-16 text-base font-bold text-white shadow-lg rounded-2xl transition-all duration-300",
-                showChatbot
-                  ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-purple-500/30"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/30"
-              )}
-              onClick={handleToggleChatbot}
-              data-testid="button-ai-assistant"
-            >
-              <MessageCircle className="h-5 w-5 mr-2" />
-              {showChatbot ? "Hide AI" : "AI Assistant"}
-            </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              className="w-full h-16 text-base font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-lg shadow-primary/30 rounded-2xl"
-              onClick={onSave}
-              data-testid="button-save"
-            >
-              <Save className="h-5 w-5 mr-2" />
-              Save Scan
-            </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              className="w-full h-16 text-base font-bold bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white shadow-lg shadow-slate-700/30 rounded-2xl"
-              onClick={onScanAgain}
-              data-testid="button-scan-again"
-            >
-              <RotateCcw className="h-5 w-5 mr-2" />
-              Scan Another
-            </Button>
-          </motion.div>
+          <Button
+            onClick={handleToggleChatbot}
+            variant={showChatbot ? "default" : "outline"}
+            data-testid="button-ai-assistant"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {showChatbot ? "Hide" : "AI"} Assistant
+          </Button>
+          <Button
+            onClick={onSave}
+            variant="outline"
+            data-testid="button-save"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save
+          </Button>
+          <Button
+            onClick={handleReportFraud}
+            variant="outline"
+            data-testid="button-report-fraud"
+          >
+            <Flag className="h-4 w-4 mr-2" />
+            Report
+          </Button>
+          <Button
+            onClick={onScanAgain}
+            data-testid="button-scan-again"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Scan Again
+          </Button>
         </motion.div>
       </div>
     </>
