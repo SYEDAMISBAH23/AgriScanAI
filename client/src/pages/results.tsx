@@ -67,7 +67,7 @@ export default function Results() {
   };
 
   const handleSave = async () => {
-    if (!scanData || !user?.email) {
+    if (!scanData || !user?.id) {
       toast({
         title: "Cannot save",
         description: "Please log in to save your scan history",
@@ -77,7 +77,7 @@ export default function Results() {
     }
 
     try {
-      await AgriScanAPI.saveToHistory(scanData, user.email);
+      await AgriScanAPI.saveToHistory(scanData, user.id);
       toast({
         title: "Scan saved",
         description: "Added to your history",

@@ -23,14 +23,14 @@ export default function History() {
   }, [user]);
 
   const loadHistory = async () => {
-    if (!user?.email) {
+    if (!user?.id) {
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     try {
-      const data = await AgriScanAPI.getHistory(user.email);
+      const data = await AgriScanAPI.getHistory(user.id);
       setHistory(data);
     } catch (error: any) {
       console.error("Failed to load history:", error);

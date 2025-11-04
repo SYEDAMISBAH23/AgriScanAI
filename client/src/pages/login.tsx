@@ -22,9 +22,21 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      const mockUser = { id: "1", email };
-      login(email);
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      login(data.email, data.userId);
 
       toast({
         title: "Welcome back!",
@@ -40,9 +52,15 @@ export default function LoginPage() {
         // No pending scan, go to home page
         setLocation("/");
       }
-      
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const fadeInUp = {

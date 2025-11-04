@@ -10,13 +10,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Simple mock authentication
-      if (email && password) {
-        res.json({ success: true, email });
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
+      if (!email || !password) {
+        return res.status(401).json({ error: "Invalid credentials" });
       }
+
+      // Get or create user (using email as username)
+      let user = await storage.getUserByUsername(email);
+      
+      if (!user) {
+        // Create new user if doesn't exist (auto-registration)
+        user = await storage.createUser({
+          username: email,
+          password: password, // NOTE: In production, this should be hashed with bcrypt!
+        });
+      } else {
+        // Verify password for existing user
+        if (user.password !== password) {
+          return res.status(401).json({ error: "Invalid credentials" });
+        }
+      }
+      
+      res.json({ success: true, email, userId: user.id });
     } catch (error: any) {
+      console.error("Login error:", error);
       res.status(401).json({ error: "Login failed" });
     }
   });
