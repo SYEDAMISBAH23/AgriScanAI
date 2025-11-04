@@ -63,11 +63,11 @@ export default function LoginPage() {
                 <img src={logoImage} alt="AgriScan AI" className="h-9 w-9 object-contain" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">AgriScan AI</h1>
+                <h1 className="text-3xl font-bold text-foreground">AgriScan AI</h1>
                 <p className="text-sm text-muted-foreground">Scan. Identify. Eat Healthy.</p>
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h2>
             <p className="text-muted-foreground">Sign in to verify your organic produce</p>
           </motion.div>
 
@@ -136,10 +136,6 @@ export default function LoginPage() {
                     )}
                   </Button>
                 </form>
-
-                <div className="mt-6 text-center text-sm text-muted-foreground">
-                  <p>Demo credentials: Any email and password</p>
-                </div>
               </CardContent>
             </Card>
           </motion.div>
