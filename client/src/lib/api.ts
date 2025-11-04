@@ -22,15 +22,14 @@ export interface ScanResult {
 
 const API_BASE_URL = "https://iamsyedamisbah-agriscan-ai-backend.hf.space";
 
-// Helper function to convert File to base64
+// Helper function to convert File to base64 data URL
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      // Extract just the base64 part (remove "data:image/...;base64," prefix)
-      const base64 = result.split(',')[1];
-      resolve(base64);
+      // Return the full data URL (including "data:image/...;base64," prefix)
+      resolve(result);
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
