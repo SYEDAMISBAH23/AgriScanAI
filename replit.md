@@ -18,21 +18,29 @@ Preferred communication style: Simple, everyday language.
 
 **Routing**: Client-side routing implemented with Wouter, a lightweight React router. Authentication state is managed via localStorage with protected routes that redirect unauthenticated users to the login page.
 
-**UI Component System**: Shadcn/ui component library with Radix UI primitives, providing accessible, customizable components. The design follows a "New York" style variant with a nature-inspired color palette emphasizing earth tones (emerald greens, warm browns, natural beige) to reinforce the organic/natural theme.
+**UI Component System**: Shadcn/ui component library with Radix UI primitives, providing accessible, customizable components. The design follows a subdued, professional aesthetic with a calm information-first approach.
 
-**Styling**: Tailwind CSS with custom design tokens for consistency. The color system includes specialized confidence indicator colors (green for very high reliability 90%+, amber for high reliability 70-89%, red for moderate reliability below 70%).
+**Styling**: Tailwind CSS with custom design tokens for consistency. The color system uses:
+- **Primary**: Deep forest green (hsl 160 18% 24%) - professional and natural
+- **Accent**: Warm tan (hsl 28 32% 58%) - subtle warmth
+- **Neutrals**: Slate and stone grays for backgrounds and text
+- **Subdued palette**: No bright gradients or flashy effects - emphasizes clarity and ease of use
 
 **State Management**: React hooks for local component state, TanStack Query (React Query) for server state management and API caching. User session data and scan history are persisted in localStorage.
 
 **Key Pages**:
-- Login page with mock authentication
-- Home page with image upload and manual PLU input
-- Results page displaying comprehensive verification analysis
-- History page showing past scans with search functionality
-- Fraud report page for user-submitted suspicious produce
-- About page explaining the system and methodology
+- **Login page**: Split layout with form on left and informational panel on right, featuring Framer Motion animations
+- **Home page**: Multi-section scrollable layout with Hero, How It Works timeline (4 steps), and expandable scanner section
+- **Results page**: Clean grid layout with image, details, and tabbed content (Details/Nutrition) - simplified without elaborate gradients
+- **History page**: Simple card grid with filter tabs (All/Organic/Non-Organic)
+- **Fraud report page**: For user-submitted suspicious produce
 
-**Design Philosophy**: Trust-oriented design emphasizing scientific credibility through clear information hierarchy, color-coded reliability indicators, and transparent presentation of AI confidence scores.
+**Design Philosophy**: 
+- **Calm & Information-First**: Subdued color palette with no bright gradients or glowing effects
+- **Clear Information Architecture**: Multi-section layouts with logical flow and easy navigation
+- **Guided Workflows**: Step-by-step explanations (How It Works) to educate users
+- **Subtle Microinteractions**: Framer Motion animations that are professional and restrained (fade-in, subtle slides)
+- **Ease of Use**: Simplified UI with clear CTAs and reduced visual noise
 
 ### Backend Architecture
 
