@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, User, UserCheck, Home } from "lucide-react";
+import { History, LogOut, Flag, Info, Scan, Upload, CheckCircle2, Shield, Sparkles, ArrowRight, Camera, ShieldCheck, BookCheck, User, UserCheck, Home as HomeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useToast } from "@/hooks/use-toast";
@@ -181,7 +181,7 @@ export default function Home() {
                   onClick={() => setLocation("/")}
                   data-testid="button-home"
                 >
-                  <Home className="h-4 w-4" />
+                  <HomeIcon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
