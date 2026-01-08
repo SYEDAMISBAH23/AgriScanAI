@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "npx tsx server/index.ts",
-    "build": "vite build && tsc server/index.ts --outDir dist --module esnext --target es2020 --moduleResolution bundler --skipLibCheck",
-    "start": "NODE_ENV=production node --loader tsx dist/index.js",
+    "build": "vite build",
+    "start": "NODE_ENV=production npx tsx server/index.ts",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },
